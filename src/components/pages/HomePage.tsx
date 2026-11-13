@@ -1,0 +1,314 @@
+import {
+  ArrowRight,
+  BarChart3,
+  Building2,
+  Coins,
+  FilePlus2,
+  FileText,
+  Globe,
+  Package,
+  Receipt,
+  RefreshCw,
+  UserPlus,
+  Users,
+  Wallet,
+} from 'lucide-react';
+import type { TranslationDict } from '../../i18n/translations';
+import type { AccountingState, AppLanguage, AppPage, CurrencyCode } from '../../types/accounting';
+import { computeAccountingSummary, formatAmount } from '../../utils/accountingEngine';
+import { PAGE_THEMES } from '../../utils/pageThemes';
+
+interface HomePageProps {
+  state: AccountingState;
+  language: AppLanguage;
+  onChangeLanguage: (lang: AppLanguage) => void;
+  onChangeCurrency: (curr: CurrencyCode) => void;
+  onNavigate: (page: AppPage) => void;
+  conflictCount: number;
+  t: TranslationDict;
+}
+
+export function HomePage({
+  state,
+  language,
+  onChangeLanguage,
+  onChangeCurrency,
+  onNavigate,
+  conflictCount,
+  t,
+}: HomePageProps) {
+  const theme = PAGE_THEMES.home;
+  const custTheme = PAGE_THEMES.customers;
+  const vendTheme = PAGE_THEMES.vendors;
+  const invTheme = PAGE_THEMES.inventory;
+  const bankTheme = PAGE_THEMES.banking;
+  const posTheme = PAGE_THEMES.pos_sync;
+  const repTheme = PAGE_THEMES.reports;
+
+  const summary = computeAccountingSummary(state);
+
+  return (
+    <div className={`flex-1 ${theme.canvasBg} overflow-y-auto`}>
+      <div className={`${theme.headerBg} border-b ${theme.headerBorder} px-5 sm:px-8 py-5`}>
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h1 className={`font-display text-xl sm:text-2xl font-bold ${theme.headingText}`}>
+              {t.home.welcomeTitle}
+            </h1>
+            <p className="text-sm text-slate-600 mt-1">{t.home.welcomeSubtitle}</p>
+          </div>
+
+          <div
+            aria-label={t.home.languageCardTitle}
+            className={`bg-white border ${theme.cardBorder} rounded-lg p-2.5 flex flex-wrap items-center gap-3 self-start lg:self-auto`}
+          >
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 px-1">
+              <Globe size={14} className={theme.accentText} aria-hidden="true" />
+              <span>{t.languageLabel}:</span>
+            </div>
+            <div role="group" aria-label={t.languageLabel} className="flex items-center gap-1 bg-slate-100 p-1 rounded">
+              {(
+                [
+                  { code: 'en', label: 'English' },
+                  { code: 'ps', label: 'پښتو' },
+                  { code: 'fa', label: 'دری' },
+                ] as const
+              ).map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => onChangeLanguage(lang.code)}
+                  aria-pressed={language === lang.code}
+                  className={`px-3 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap shrink-0 ${
+                    language === lang.code
+                      ? `${theme.accentBg} text-white`
+                      : 'text-slate-700 hover:bg-white'
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="h-5 w-px bg-slate-200 hidden sm:block" aria-hidden="true" />
+
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+              <Coins size={14} className={theme.accentText} aria-hidden="true" />
+              <span>{t.currencyLabel}:</span>
+            </div>
+            <div role="group" aria-label={t.currencyLabel} className="flex items-center gap-1 bg-slate-100 p-1 rounded">
+              {(['AFN', 'USD'] as const).map((curr) => (
+                <button
+                  key={curr}
+                  type="button"
+                  onClick={() => onChangeCurrency(curr)}
+                  aria-pressed={state.currency === curr}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap shrink-0 ${
+                    state.currency === curr
+                      ? 'bg-slate-800 text-white'
+                      : 'text-slate-700 hover:bg-white'
+                  }`}
+                >
+                  {curr === 'AFN' ? 'AFN (؋)' : 'USD ($)'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto p-5 sm:p-8 space-y-6">
+        {/* 4-column summary KPI strip */}
+        <section aria-label="Business numbers" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white border border-slate-200 rounded-lg p-4">
+            <p className="text-xs font-medium text-slate-500">{t.home.cashOnHand}</p>
+            <p className={`font-display text-xl font-bold ${bankTheme.accentText} tabular-nums mt-1`}>
+              {formatAmount(summary.totalCashUsd, state.currency)}
+            </p>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-lg p-4">
+            <p className="text-xs font-medium text-slate-500">{t.home.moneyOwedToYou}</p>
+            <p className={`font-display text-xl font-bold ${custTheme.accentText} tabular-nums mt-1`}>
+              {formatAmount(summary.totalReceivablesUsd, state.currency)}
+            </p>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-lg p-4">
+            <p className="text-xs font-medium text-slate-500">{t.home.billsYouOwe}</p>
+            <p className={`font-display text-xl font-bold ${vendTheme.accentText} tabular-nums mt-1`}>
+              {formatAmount(summary.totalPayablesUsd, state.currency)}
+            </p>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-lg p-4">
+            <p className="text-xs font-medium text-slate-500">{t.home.netProfit}</p>
+            <p
+              className={`font-display text-xl font-bold tabular-nums mt-1 ${
+                summary.netProfitUsd >= 0 ? repTheme.accentText : posTheme.accentText
+              }`}
+            >
+              {formatAmount(summary.netProfitUsd, state.currency)}
+            </p>
+          </div>
+        </section>
+
+        {/* Visual Workflow Flowchart */}
+        <section aria-label={t.home.workflowHeading} className="space-y-4">
+          <h2 className="font-display text-base font-bold text-slate-900">
+            {t.home.workflowHeading}
+          </h2>
+
+          {/* Lane 1: Customers */}
+          <div className={`bg-white border ${custTheme.cardBorder} rounded-lg p-5`}>
+            <div className={`text-xs font-bold ${custTheme.headingText} mb-3`}>
+              {t.home.customersLane}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
+              <button
+                type="button"
+                onClick={() => onNavigate('customers')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:bg-[#E2EFE8] text-start transition-colors`}
+              >
+                <UserPlus size={20} className={`${custTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{t.home.stepNewCustomer}</div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepNewCustomerDesc}</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('customers')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:bg-[#E2EFE8] text-start transition-colors`}
+              >
+                <FilePlus2 size={20} className={`${custTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-slate-900 flex items-center justify-between gap-2">
+                    <span>{t.home.stepCreateInvoice}</span>
+                    <ArrowRight size={14} className={`${custTheme.accentText} shrink-0 rtl:rotate-180`} aria-hidden="true" />
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepCreateInvoiceDesc}</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('customers')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:bg-[#E2EFE8] text-start transition-colors`}
+              >
+                <Wallet size={20} className={`${custTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{t.home.stepReceivePayment}</div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepReceivePaymentDesc}</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Lane 2: Vendors */}
+          <div className={`bg-white border ${vendTheme.cardBorder} rounded-lg p-5`}>
+            <div className={`text-xs font-bold ${vendTheme.headingText} mb-3`}>
+              {t.home.vendorsLane}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
+              <button
+                type="button"
+                onClick={() => onNavigate('vendors')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:bg-[#EDE3D5] text-start transition-colors`}
+              >
+                <Users size={20} className={`${vendTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{t.home.stepAddVendor}</div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepAddVendorDesc}</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('vendors')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:bg-[#EDE3D5] text-start transition-colors`}
+              >
+                <FileText size={20} className={`${vendTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-slate-900 flex items-center justify-between gap-2">
+                    <span>{t.home.stepEnterBill}</span>
+                    <ArrowRight size={14} className={`${vendTheme.accentText} shrink-0 rtl:rotate-180`} aria-hidden="true" />
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepEnterBillDesc}</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('vendors')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:bg-[#EDE3D5] text-start transition-colors`}
+              >
+                <Receipt size={20} className={`${vendTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{t.home.stepPayBills}</div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepPayBillsDesc}</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Lane 3: Company / Inventory / Banking / POS Sync / Reports */}
+          <div className="bg-white border border-slate-200 rounded-lg p-5">
+            <div className="text-xs font-bold text-slate-700 mb-3">
+              {t.home.companyLane}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <button
+                type="button"
+                onClick={() => onNavigate('inventory')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${invTheme.cardBorder} ${invTheme.subtleCardBg} hover:bg-[#E4E7F2] text-start transition-colors`}
+              >
+                <Package size={20} className={`${invTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{t.home.stepInventory}</div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepInventoryDesc}</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('banking')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${bankTheme.cardBorder} ${bankTheme.subtleCardBg} hover:bg-[#E0ECF2] text-start transition-colors`}
+              >
+                <Building2 size={20} className={`${bankTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{t.home.stepBanking}</div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepBankingDesc}</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('pos_sync')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${posTheme.cardBorder} ${posTheme.subtleCardBg} hover:bg-[#EFE2E2] text-start transition-colors`}
+              >
+                <RefreshCw size={20} className={`${posTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">
+                    {t.home.stepPosSync} ({conflictCount})
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepPosSyncDesc}</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('reports')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${repTheme.cardBorder} ${repTheme.subtleCardBg} hover:bg-[#E8E2F0] text-start transition-colors`}
+              >
+                <BarChart3 size={20} className={`${repTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{t.home.stepReports}</div>
+                  <div className="text-xs text-slate-600 mt-0.5">{t.home.stepReportsDesc}</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

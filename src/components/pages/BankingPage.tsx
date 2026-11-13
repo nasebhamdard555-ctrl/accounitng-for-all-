@@ -1,0 +1,225 @@
+import { useState } from 'react';
+import { ArrowDownLeft, ArrowUpRight, Building2, PlusCircle } from 'lucide-react';
+import type { TranslationDict } from '../../i18n/translations';
+import type { AccountingState } from '../../types/accounting';
+import { formatAmount } from '../../utils/accountingEngine';
+import { PAGE_THEMES } from '../../utils/pageThemes';
+
+interface BankingPageProps {
+  state: AccountingState;
+  onRecordEntry: (input: {
+    accountId: string;
+    type: 'deposit' | 'expense';
+    description: string;
+    amountUsd: number;
+  }) => { ok: boolean; error?: string };
+  t: TranslationDict;
+}
+
+export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
+  const theme = PAGE_THEMES.banking;
+  const [accountId, setAccountId] = useState(state.bankAccounts[0]?.id || '');
+  const [entryType, setEntryType] = useState<'deposit' | 'expense'>('expense');
+  const [description, setDescription] = useState('');
+  const [amountUsd, setAmountUsd] = useState('50');
+  const [feedback, setFeedback] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+
+  const handleRecord = (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = onRecordEntry({
+      accountId,
+      type: entryType,
+      description,
+      amountUsd: Number(amountUsd),
+    });
+    if (!res.ok) {
+      setFeedback({ type: 'err', text: res.error || 'Could not record transaction.' });
+      return;
+    }
+    setDescription('');
+    setAmountUsd('50');
+    setFeedback({ type: 'ok', text: `${t.banking.recordBtn} — ${t.common.save}` });
+  };
+
+  return (
+    <div className={`flex-1 ${theme.canvasBg} overflow-y-auto`}>
+      <div className={`${theme.headerBg} border-b ${theme.headerBorder} px-5 sm:px-8 py-5`}>
+        <div className="max-w-6xl mx-auto">
+          <h1 className={`font-display text-xl sm:text-2xl font-bold ${theme.headingText}`}>
+            {t.banking.pageTitle}
+          </h1>
+          <p className="text-sm text-slate-700 mt-1">{t.banking.pageSubtitle}</p>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto p-5 sm:p-8 space-y-6">
+        {feedback && (
+          <div
+            role={feedback.type === 'err' ? 'alert' : 'status'}
+            className={`px-4 py-3 rounded-md border text-sm flex items-center justify-between ${
+              feedback.type === 'ok'
+                ? 'bg-[#EDF5F1] border-[#B5CFC3] text-[#1E4234]'
+                : 'bg-[#F5ECEC] border-[#D4B8B8] text-[#522727]'
+            }`}
+          >
+            <span>{feedback.text}</span>
+            <button type="button" onClick={() => setFeedback(null)} className="text-xs font-semibold underline">
+              OK
+            </button>
+          </div>
+        )}
+
+        {/* Accounts Cards */}
+        <section aria-label={t.banking.accountsTitle} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {state.bankAccounts.map((acct) => (
+            <div key={acct.id} className={`bg-white border ${theme.cardBorder} rounded-lg p-5 flex items-center justify-between gap-4`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-md ${theme.subtleCardBg} ${theme.accentText}`}>
+                  <Building2 size={20} aria-hidden="true" />
+                </div>
+                <div>
+                  <h2 className="font-display text-sm font-bold text-slate-900">{acct.name}</h2>
+                  <p className="text-xs text-slate-500 uppercase mt-0.5">{acct.accountType}</p>
+                </div>
+              </div>
+              <div className={`font-display text-xl font-bold ${theme.headingText} tabular-nums`}>
+                {formatAmount(acct.balanceUsd, state.currency)}
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* Record Entry Form */}
+        <form
+          onSubmit={handleRecord}
+          className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}
+        >
+          <div className={`flex items-center gap-2 ${theme.headingText}`}>
+            <PlusCircle size={18} aria-hidden="true" />
+            <h2 className="font-display text-base font-bold">{t.banking.recordEntryTitle}</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label htmlFor="bank-acct" className="block text-xs font-semibold text-slate-700 mb-1">
+                {t.common.account}
+              </label>
+              <select
+                id="bank-acct"
+                value={accountId}
+                onChange={(e) => setAccountId(e.target.value)}
+                className={`w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 ${theme.accentRing}`}
+              >
+                {state.bankAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="bank-type" className="block text-xs font-semibold text-slate-700 mb-1">
+                {t.banking.entryType}
+              </label>
+              <select
+                id="bank-type"
+                value={entryType}
+                onChange={(e) => setEntryType(e.target.value as 'deposit' | 'expense')}
+                className={`w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 ${theme.accentRing}`}
+              >
+                <option value="deposit">{t.banking.deposit}</option>
+                <option value="expense">{t.banking.expense}</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="bank-desc" className="block text-xs font-semibold text-slate-700 mb-1">
+                {t.common.description}
+              </label>
+              <input
+                id="bank-desc"
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g., Shop rent / Cash deposit"
+                className={`w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 ${theme.accentRing}`}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="bank-amt" className="block text-xs font-semibold text-slate-700 mb-1">
+                {t.banking.amountUsd}
+              </label>
+              <input
+                id="bank-amt"
+                type="number"
+                min={1}
+                step="0.01"
+                value={amountUsd}
+                onChange={(e) => setAmountUsd(e.target.value)}
+                className={`w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-sm tabular-nums text-slate-900 focus:outline-none focus:ring-2 ${theme.accentRing}`}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-slate-100">
+            <button
+              type="submit"
+              className={`px-4 py-2 text-sm font-semibold text-white rounded-md ${theme.accentBg} ${theme.accentHover} transition-colors`}
+            >
+              {t.banking.recordBtn}
+            </button>
+          </div>
+        </form>
+
+        {/* Register History */}
+        <section className={`bg-white border ${theme.cardBorder} rounded-lg overflow-hidden`}>
+          <div className="px-5 py-3.5 border-b border-slate-200">
+            <h2 className="font-display text-base font-bold text-slate-900">
+              {t.banking.registerTitle}
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-start border-collapse">
+              <thead className={`${theme.subtleCardBg} border-b ${theme.cardBorder}`}>
+                <tr>
+                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-700 text-start">{t.common.date}</th>
+                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-700 text-start">{t.common.account}</th>
+                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-700 text-start">{t.common.description}</th>
+                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-700 text-end">{t.common.amount}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {state.bankTransactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-[#ECF3F7]/60">
+                    <td className="px-4 py-3 text-xs text-slate-600 tabular-nums whitespace-nowrap">{tx.date}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-slate-800">{tx.accountName}</td>
+                    <td className="px-4 py-3 text-sm text-slate-700">{tx.description}</td>
+                    <td className="px-4 py-3 text-sm font-semibold tabular-nums text-end whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center gap-1 ${
+                          tx.amountUsd >= 0 ? 'text-[#2E6B52]' : 'text-[#8C3B3B]'
+                        }`}
+                      >
+                        {tx.amountUsd >= 0 ? (
+                          <ArrowDownLeft size={13} aria-hidden="true" />
+                        ) : (
+                          <ArrowUpRight size={13} aria-hidden="true" />
+                        )}
+                        <span>
+                          {tx.amountUsd >= 0 ? '+' : '-'}
+                          {formatAmount(Math.abs(tx.amountUsd), state.currency)}
+                        </span>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
