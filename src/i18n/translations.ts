@@ -1,4 +1,4 @@
-import type { AppLanguage, AppPage } from '../types/accounting';
+import type { AppLanguage, AppPage, AppThemeId } from '../types/accounting';
 
 export interface TranslationDict {
   appName: string;
@@ -63,6 +63,24 @@ export interface TranslationDict {
     moneyOwedToYou: string;
     billsYouOwe: string;
     netProfit: string;
+    quickActionsTitle: string;
+    quickActionsSubtitle: string;
+    qaRecordSale: string;
+    qaRecordSaleDesc: string;
+    qaLogPayment: string;
+    qaLogPaymentDesc: string;
+    qaUnpaidCount: string;
+    qaAddCustomer: string;
+    qaAddCustomerDesc: string;
+    qaEnterBill: string;
+    qaEnterBillDesc: string;
+    qaRecordExpense: string;
+    qaRecordExpenseDesc: string;
+    qaViewReports: string;
+    qaViewReportsDesc: string;
+    dueSoonAlert: string;
+    lowStockAlert: string;
+    unpaidBillsAlert: string;
   };
   customers: {
     pageTitle: string;
@@ -79,6 +97,25 @@ export interface TranslationDict {
     customersListTitle: string;
     receivePaymentBtn: string;
     balanceOwed: string;
+    printPdfBtn: string;
+    invoicePreviewTitle: string;
+    printSavePdfBtn: string;
+    officialInvoiceHeading: string;
+    billToLabel: string;
+    invoiceDetailsLabel: string;
+    skuLabel: string;
+    subtotalLabel: string;
+    amountPaidLabel: string;
+    balanceDueLabel: string;
+    paidIntoAccountLabel: string;
+    authorizedSignatureLabel: string;
+    customerSignatureLabel: string;
+    officialRecordNote: string;
+    filterAll: string;
+    filterUnpaid: string;
+    searchPlaceholder: string;
+    dueDateInput: string;
+    collectIntoLabel: string;
   };
   vendors: {
     pageTitle: string;
@@ -94,6 +131,9 @@ export interface TranslationDict {
     payBillBtn: string;
     payFromAccount: string;
     amountYouOwe: string;
+    filterAll: string;
+    filterUnpaid: string;
+    searchPlaceholder: string;
   };
   inventory: {
     pageTitle: string;
@@ -109,6 +149,13 @@ export interface TranslationDict {
     stockListTitle: string;
     inStock: string;
     lowStock: string;
+    filterAll: string;
+    filterLowStock: string;
+    searchPlaceholder: string;
+    totalSkusLabel: string;
+    lowStockItemsLabel: string;
+    totalStockValueLabel: string;
+    retailValueLabel: string;
   };
   banking: {
     pageTitle: string;
@@ -121,6 +168,11 @@ export interface TranslationDict {
     amountUsd: string;
     recordBtn: string;
     registerTitle: string;
+    filterAll: string;
+    filterDeposits: string;
+    filterExpenses: string;
+    searchPlaceholder: string;
+    allAccountsBtn: string;
   };
   posSync: {
     pageTitle: string;
@@ -145,12 +197,69 @@ export interface TranslationDict {
     notePlaceholder: string;
     availablePhonesLabel: string;
     fixedBanner: string;
+    resolutionLogTitle: string;
+    noLogs: string;
+    actionReassigned: string;
+    actionOverride: string;
+    actionVoided: string;
   };
   reports: {
     pageTitle: string;
     pageSubtitle: string;
     printBtn: string;
     exportCsvBtn: string;
+    periodReportTitle: string;
+    periodReportSubtitle: string;
+    periodDay: string;
+    periodWeek: string;
+    periodMonth: string;
+    reportDateLabel: string;
+    dateRangeLabel: string;
+    unitsSoldLabel: string;
+    totalSalesLabel: string;
+    cashPaidLabel: string;
+    loanGivenLabel: string;
+    itemsBreakdownTitle: string;
+    unitPriceLabel: string;
+    cashPortionLabel: string;
+    loanPortionLabel: string;
+    loansWithWhomTitle: string;
+    borrowerLabel: string;
+    itemAndQtyLabel: string;
+    loanAmountLabel: string;
+    noLoansInPeriod: string;
+    noSalesInPeriod: string;
+    exportPeriodCsvBtn: string;
+    outstandingLoansTitle: string;
+    outstandingLoansSubtitle: string;
+    outstandingTotalLabel: string;
+    outstandingCustomersLabel: string;
+    loanDateLabel: string;
+    paymentDeadlineLabel: string;
+    loanInvoiceLabel: string;
+    deadlineOverdueLabel: string;
+    deadlineDueTodayLabel: string;
+    deadlineUpcomingLabel: string;
+    dueWithin48hFlag: string;
+    dueSoonCountLabel: string;
+    paymentDueBadge: string;
+    remindCustomerBtn: string;
+    remindedLabel: string;
+    reminderModalTitle: string;
+    reminderMessageLabel: string;
+    copyReminderBtn: string;
+    copiedConfirm: string;
+    callCustomerLabel: string;
+    sendSmsLabel: string;
+    markRemindedBtn: string;
+    exportLoansCsvBtn: string;
+    noOutstandingLoans: string;
+    loanFilterAll: string;
+    loanFilterDueSoon: string;
+    loanFilterOverdue: string;
+    collectPaymentBtn: string;
+    payVendorBillBtn: string;
+    todayBtn: string;
     profitLossTitle: string;
     totalSalesCollected: string;
     totalExpensesPaid: string;
@@ -172,12 +281,37 @@ export interface TranslationDict {
     goToPageBtn: string;
     closeBtn: string;
   };
+  backup: {
+    sectionTitle: string;
+    exportBtn: string;
+    importBtn: string;
+    exportSuccess: string;
+    importSuccess: string;
+    invalidJsonError: string;
+    invalidStructureError: string;
+    dismissBtn: string;
+  };
+  settings: {
+    pageTitle: string;
+    pageSubtitle: string;
+    themeSectionTitle: string;
+    themeSectionSubtitle: string;
+    activeLabel: string;
+    paletteBadge: string;
+    sectionColorsTitle: string;
+    sectionColorsDesc: string;
+    themes: Record<AppThemeId, { name: string; desc: string }>;
+    preferencesTitle: string;
+    preferencesSubtitle: string;
+    dataSafetyTitle: string;
+    dataSafetyDesc: string;
+  };
 }
 
 export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
   en: {
-    appName: 'Meridian Accounting',
-    tagline: 'Office Accounting Workspace',
+    appName: 'Meridian Ledger Pro',
+    tagline: 'Professional Small-Business Accounting',
     languageLabel: 'Language',
     currencyLabel: 'Currency',
     helpBotButton: 'Step-by-Step Assistant',
@@ -189,6 +323,7 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       banking: 'Banking & Cash',
       pos_sync: 'POS Sync Fixes',
       reports: 'Business Reports',
+      settings: 'Settings',
     },
     common: {
       save: 'Save',
@@ -241,11 +376,29 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stepPosSync: 'POS Sync Fixes',
       stepPosSyncDesc: 'Fix offline receipt problems',
       stepReports: 'Business Reports',
-      stepReportsDesc: 'Profit, debts & stock value',
+      stepReportsDesc: 'Daily, weekly & monthly sales, cash vs loans',
       cashOnHand: 'Total Cash & Bank',
       moneyOwedToYou: 'Customers Owe You',
       billsYouOwe: 'Bills You Owe',
       netProfit: 'Net Profit (Collected)',
+      quickActionsTitle: 'Quick Actions',
+      quickActionsSubtitle: 'Jump straight into your most common daily accounting tasks in one click.',
+      qaRecordSale: 'Record Sale',
+      qaRecordSaleDesc: 'Create cash or loan invoice',
+      qaLogPayment: 'Log Payment',
+      qaLogPaymentDesc: 'Collect cash on unpaid invoices',
+      qaUnpaidCount: 'unpaid',
+      qaAddCustomer: 'Add Customer',
+      qaAddCustomerDesc: 'Save a new buyer profile',
+      qaEnterBill: 'Enter Bill',
+      qaEnterBillDesc: 'Record a supplier purchase',
+      qaRecordExpense: 'Log Expense / Deposit',
+      qaRecordExpenseDesc: 'Update cash drawer or bank',
+      qaViewReports: 'Closing & Loan Report',
+      qaViewReportsDesc: 'Daily sales & unpaid loans',
+      dueSoonAlert: 'due within 48h',
+      lowStockAlert: 'low stock',
+      unpaidBillsAlert: 'unpaid',
     },
     customers: {
       pageTitle: 'Customers & Sales Invoices',
@@ -262,6 +415,25 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       customersListTitle: 'Customer Directory',
       receivePaymentBtn: 'Receive Payment',
       balanceOwed: 'Owes You',
+      printPdfBtn: 'Print / PDF',
+      invoicePreviewTitle: 'Official Business Invoice (Print / Save as PDF)',
+      printSavePdfBtn: 'Print / Save PDF',
+      officialInvoiceHeading: 'OFFICIAL SALES INVOICE',
+      billToLabel: 'Bill To',
+      invoiceDetailsLabel: 'Invoice Details',
+      skuLabel: 'SKU',
+      subtotalLabel: 'Subtotal',
+      amountPaidLabel: 'Amount Paid',
+      balanceDueLabel: 'Balance Due',
+      paidIntoAccountLabel: 'Deposited Account',
+      authorizedSignatureLabel: 'Authorized Signature',
+      customerSignatureLabel: 'Customer Signature',
+      officialRecordNote: 'Official business accounting record issued by Meridian Ledger Pro.',
+      filterAll: 'All',
+      filterUnpaid: 'Unpaid',
+      searchPlaceholder: 'Search invoice #, customer, or item...',
+      dueDateInput: 'Payment Deadline',
+      collectIntoLabel: 'Collect into',
     },
     vendors: {
       pageTitle: 'Suppliers & Bills to Pay',
@@ -277,6 +449,9 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       payBillBtn: 'Pay Bill',
       payFromAccount: 'Pay from account',
       amountYouOwe: 'You Owe',
+      filterAll: 'All',
+      filterUnpaid: 'Unpaid',
+      searchPlaceholder: 'Search bill #, supplier, or details...',
     },
     inventory: {
       pageTitle: 'Items & Store Stock',
@@ -292,6 +467,13 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stockListTitle: 'Current Store Inventory',
       inStock: 'In Stock',
       lowStock: 'Low Stock',
+      filterAll: 'All',
+      filterLowStock: 'Low Stock',
+      searchPlaceholder: 'Search product or SKU...',
+      totalSkusLabel: 'Total Products',
+      lowStockItemsLabel: 'Low Stock Alert (<= 2)',
+      totalStockValueLabel: 'Inventory Cost Value',
+      retailValueLabel: 'Retail Value',
     },
     banking: {
       pageTitle: 'Banking & Cash Register',
@@ -304,6 +486,11 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       amountUsd: 'Amount (USD)',
       recordBtn: 'Save Entry',
       registerTitle: 'Account Register History',
+      filterAll: 'All',
+      filterDeposits: 'Deposits',
+      filterExpenses: 'Expenses',
+      searchPlaceholder: 'Search description or account...',
+      allAccountsBtn: 'All Accounts',
     },
     posSync: {
       pageTitle: 'Offline POS Sync Fixes (Simple Mode)',
@@ -328,12 +515,69 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       notePlaceholder: 'Write short reason (e.g., Manager approved discount)...',
       availablePhonesLabel: 'Ready phones in stock (click one to fill automatically):',
       fixedBanner: 'Done! The receipt was fixed and added to your ledger.',
+      resolutionLogTitle: 'Recent POS Sync Audit Log',
+      noLogs: 'No sync fixes recorded yet.',
+      actionReassigned: 'IMEI Replaced',
+      actionOverride: 'Manager Approved',
+      actionVoided: 'Cancelled',
     },
     reports: {
-      pageTitle: 'Simple Business Reports',
-      pageSubtitle: 'Instant summary of your profit, unpaid customer invoices, supplier bills, and stock value.',
+      pageTitle: 'Daily, Weekly & Monthly Business Reports',
+      pageSubtitle: 'Full end-of-day, end-of-week, and end-of-month breakdown of units sold, selling prices, cash paid, and customer loans.',
       printBtn: 'Print Report',
-      exportCsvBtn: 'Download Summary (CSV)',
+      exportCsvBtn: 'Download Full Summary (CSV)',
+      periodReportTitle: 'End-of-Period Sales, Cash & Loan Report',
+      periodReportSubtitle: 'See exactly how many units were sold, at what price, how much was paid in cash, and how much is on loan with each customer.',
+      periodDay: 'End of Day',
+      periodWeek: 'End of Week',
+      periodMonth: 'End of Month',
+      reportDateLabel: 'Report Date',
+      dateRangeLabel: 'Period Covered',
+      unitsSoldLabel: 'Units Sold',
+      totalSalesLabel: 'Total Period Sales',
+      cashPaidLabel: 'Paid in Cash / Bank',
+      loanGivenLabel: 'Given on Loan (Credit)',
+      itemsBreakdownTitle: 'How Many Sold & At What Price',
+      unitPriceLabel: 'Unit Price',
+      cashPortionLabel: 'Cash Paid',
+      loanPortionLabel: 'On Loan',
+      loansWithWhomTitle: 'Loans Given & With Whom',
+      borrowerLabel: 'Customer (With Whom)',
+      itemAndQtyLabel: 'Item & Qty Sold',
+      loanAmountLabel: 'Loan Amount',
+      noLoansInPeriod: 'All sales in this period were paid in cash — zero loans.',
+      noSalesInPeriod: 'No sales recorded for this selected period.',
+      exportPeriodCsvBtn: 'Download Period Report (CSV)',
+      outstandingLoansTitle: 'Outstanding Loans',
+      outstandingLoansSubtitle: 'Customers with unpaid balances, showing each individual loan date and payment deadline.',
+      outstandingTotalLabel: 'Total Unpaid Balance',
+      outstandingCustomersLabel: 'Customers with Unpaid Balances',
+      loanDateLabel: 'Loan Date',
+      paymentDeadlineLabel: 'Payment Deadline',
+      loanInvoiceLabel: 'Loan #',
+      deadlineOverdueLabel: 'Overdue',
+      deadlineDueTodayLabel: 'Due Today',
+      deadlineUpcomingLabel: 'Days Left',
+      dueWithin48hFlag: 'Due < 48h',
+      dueSoonCountLabel: 'due within 48h',
+      paymentDueBadge: 'Payment Due',
+      remindCustomerBtn: 'Remind Customer',
+      remindedLabel: 'Reminded',
+      reminderModalTitle: 'Customer Payment Reminder',
+      reminderMessageLabel: 'Reminder Message (Ready for SMS / WhatsApp)',
+      copyReminderBtn: 'Copy Message',
+      copiedConfirm: 'Copied!',
+      callCustomerLabel: 'Call Phone',
+      sendSmsLabel: 'Send SMS',
+      markRemindedBtn: 'Done & Mark Reminded',
+      exportLoansCsvBtn: 'Download Loans (CSV)',
+      noOutstandingLoans: 'No customers currently have unpaid loan balances.',
+      loanFilterAll: 'All Loans',
+      loanFilterDueSoon: 'Due < 48h',
+      loanFilterOverdue: 'Overdue',
+      collectPaymentBtn: 'Collect Payment',
+      payVendorBillBtn: 'Pay Bills',
+      todayBtn: 'Today',
       profitLossTitle: 'Profit & Loss Summary',
       totalSalesCollected: 'Paid Sales Income',
       totalExpensesPaid: 'Paid Bills & Shop Expenses',
@@ -355,10 +599,52 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       goToPageBtn: 'Open That Page',
       closeBtn: 'Close Guide',
     },
+    backup: {
+      sectionTitle: 'Data Safety',
+      exportBtn: 'Backup Data',
+      importBtn: 'Import Backup',
+      exportSuccess: 'Backup file downloaded safely.',
+      importSuccess: 'Backup restored successfully. All ledgers and balances updated.',
+      invalidJsonError: 'Could not read file: please select a valid JSON backup file.',
+      invalidStructureError: 'Invalid backup file: missing required accounting records.',
+      dismissBtn: 'OK',
+    },
+    settings: {
+      pageTitle: 'User Settings & Appearance',
+      pageSubtitle: 'Choose a subtle, professional color theme and manage language, currency, and backups.',
+      themeSectionTitle: 'Interface Color Theme',
+      themeSectionSubtitle: 'Every theme keeps each accounting section subtly distinct while staying calm on the eyes.',
+      activeLabel: 'Active Theme',
+      paletteBadge: '8-page palette',
+      sectionColorsTitle: 'Per-Page Subtle Color Map (Click any section to preview)',
+      sectionColorsDesc: 'Each accounting page uses its own calm tint and accent within the selected theme.',
+      themes: {
+        classic_ledger: {
+          name: 'Classic Ledger',
+          desc: 'Executive navy, forest sage, and warm walnut accents on crisp light paper.',
+        },
+        warm_parchment: {
+          name: 'Warm Parchment',
+          desc: 'Soft ivory paper with espresso bronze, olive sage, and muted terracotta tones.',
+        },
+        crisp_pewter: {
+          name: 'Crisp Pewter',
+          desc: 'Cool graphite neutrals paired with slate pine, steel indigo, and ochre accents.',
+        },
+        botanical_stone: {
+          name: 'Botanical Stone',
+          desc: 'Calm mineral greens, deep teal, and soft sandstone for long desk sessions.',
+        },
+      },
+      preferencesTitle: 'Language & Currency Defaults',
+      preferencesSubtitle: 'Switch display language (English, Pashto, Dari) and ledger currency anytime.',
+      dataSafetyTitle: 'Backup & Data Management',
+      dataSafetyDesc: 'Download a complete JSON copy of your ledgers or restore from a saved backup file.',
+    },
   },
   ps: {
-    appName: 'د مریدین حسابداري',
-    tagline: 'د سوداګرۍ اسانه حسابداري',
+    appName: 'مریدین لیجر پرو',
+    tagline: 'د سوداګرۍ مسلکي حسابداري',
     languageLabel: 'ژبه',
     currencyLabel: 'اسعار',
     helpBotButton: 'لارښود مرستیال',
@@ -370,6 +656,7 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       banking: 'بانک او نغدې پیسې',
       pos_sync: 'د آفلاین پلور سمون',
       reports: 'د سوداګرۍ راپورونه',
+      settings: 'تنظیمات',
     },
     common: {
       save: 'ثبت کړئ',
@@ -422,11 +709,29 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stepPosSync: 'د آفلاین پلور سمون',
       stepPosSyncDesc: 'د آفلاین رسید ستونزې حل کړئ',
       stepReports: 'سوداګریز راپورونه',
-      stepReportsDesc: 'ګټه، طلبات او د ګودام ارزښت',
+      stepReportsDesc: 'ورځني، اونیز او میاشتني پلور، نغد او پورونه',
       cashOnHand: 'ټولې نغدې او بانک',
       moneyOwedToYou: 'پر پیرودونکو طلبات',
       billsYouOwe: 'پر تاسو پورونه',
       netProfit: 'خالصه ګټه (راټوله شوې)',
+      quickActionsTitle: 'چټکې کړنې',
+      quickActionsSubtitle: 'په یوه کلیک سره د ورځني حسابدارۍ عام کارونه سمدستي پیل کړئ.',
+      qaRecordSale: 'پلور ثبت کړئ',
+      qaRecordSaleDesc: 'نغدي یا پور بل جوړ کړئ',
+      qaLogPayment: 'تادیه ثبت کړئ',
+      qaLogPaymentDesc: 'د پاتې بلونو پیسې واخلئ',
+      qaUnpaidCount: 'ناتادیه',
+      qaAddCustomer: 'پیرودونکی زیات کړئ',
+      qaAddCustomerDesc: 'نوی پیرودونکی ثبت کړئ',
+      qaEnterBill: 'د خرید بل ثبتول',
+      qaEnterBillDesc: 'د عرضه کوونکي بل ولیکئ',
+      qaRecordExpense: 'لګښت یا جمع ثبتول',
+      qaRecordExpenseDesc: 'دخل یا بانکي حساب تازه کړئ',
+      qaViewReports: 'ورځنی او د پور راپور',
+      qaViewReportsDesc: 'پلور او پاتې پورونه وګورئ',
+      dueSoonAlert: 'په ۴۸ ساعتونو کې سررسید',
+      lowStockAlert: 'کم موجودي',
+      unpaidBillsAlert: 'ناتادیه',
     },
     customers: {
       pageTitle: 'پیرودونکي او د پلور بلونه',
@@ -443,6 +748,25 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       customersListTitle: 'د پیرودونکو لست',
       receivePaymentBtn: 'پیسې واخلئ',
       balanceOwed: 'پاتې حساب',
+      printPdfBtn: 'چاپ / PDF',
+      invoicePreviewTitle: 'د پلور رسمي بل (چاپ یا د PDF خوندي کول)',
+      printSavePdfBtn: 'چاپ / PDF خوندي کړئ',
+      officialInvoiceHeading: 'د پلور رسمي بل',
+      billToLabel: 'پیرودونکی',
+      invoiceDetailsLabel: 'د بل معلومات',
+      skuLabel: 'کوډ (SKU)',
+      subtotalLabel: 'فرعي مجموعه',
+      amountPaidLabel: 'تادیه شوې پیسې',
+      balanceDueLabel: 'پاتې مبلغ',
+      paidIntoAccountLabel: 'د جمع کولو حساب',
+      authorizedSignatureLabel: 'د مسؤل لاسلیک',
+      customerSignatureLabel: 'د پیرودونکي لاسلیک',
+      officialRecordNote: 'دا رسمي حسابداري سند د مریدین لیجر پرو لخوا صادر شوی دی.',
+      filterAll: 'ټول',
+      filterUnpaid: 'ناتادیه',
+      searchPlaceholder: 'د بل شمېره، پیرودونکی یا توکی ولټوئ...',
+      dueDateInput: 'د تادیې وروستۍ نېټه',
+      collectIntoLabel: 'پیسې کوم حساب ته',
     },
     vendors: {
       pageTitle: 'عرضه کوونکي او د تادیې بلونه',
@@ -458,6 +782,9 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       payBillBtn: 'بل تادیه کړئ',
       payFromAccount: 'له کوم حسابه تادیه شي',
       amountYouOwe: 'ستاسو پور',
+      filterAll: 'ټول',
+      filterUnpaid: 'ناتادیه',
+      searchPlaceholder: 'د بل شمېره، عرضه کوونکی یا تشریح ولټوئ...',
     },
     inventory: {
       pageTitle: 'توکي او د پلورنځي ګودام',
@@ -473,6 +800,13 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stockListTitle: 'په ګودام کې شته توکي',
       inStock: 'په ګودام کې شته',
       lowStock: 'کم شوی دی',
+      filterAll: 'ټول',
+      filterLowStock: 'کم شوي توکي',
+      searchPlaceholder: 'توکی یا کوډ (SKU) ولټوئ...',
+      totalSkusLabel: 'ټول محصولات',
+      lowStockItemsLabel: 'کم شوي توکي (<= ۲)',
+      totalStockValueLabel: 'د ګودام د اخیستو ارزښت',
+      retailValueLabel: 'د پلور ارزښت',
     },
     banking: {
       pageTitle: 'بانک او د نغدو دخل',
@@ -485,6 +819,11 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       amountUsd: 'مبلغ (ډالر)',
       recordBtn: 'معامله ثبت کړئ',
       registerTitle: 'د بانکي او نغدو معاملو تاریخچه',
+      filterAll: 'ټول',
+      filterDeposits: 'جمع شوې',
+      filterExpenses: 'لګښتونه',
+      searchPlaceholder: 'تشریح یا حساب ولټوئ...',
+      allAccountsBtn: 'ټول حسابونه',
     },
     posSync: {
       pageTitle: 'د آفلاین پلور ستونزې (اسانه حل)',
@@ -509,12 +848,69 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       notePlaceholder: 'لنډ دلیل ولیکئ (لکه: د مدیر په اجازه تخفیف)...',
       availablePhonesLabel: 'په ګودام کې تیار موبایلونه (د اتومات ډکولو لپاره کلیک کړئ):',
       fixedBanner: 'بریالی شو! رسید سم شو او حساب ته اضافه شو.',
+      resolutionLogTitle: 'د وروستیو سمونونو تاریخچه',
+      noLogs: 'تر اوسه کوم سمون نه دی ثبت شوی.',
+      actionReassigned: 'IMEI بدل شو',
+      actionOverride: 'مدیر تایید کړ',
+      actionVoided: 'لغوه شو',
     },
     reports: {
-      pageTitle: 'د کاروبار ساده راپورونه',
-      pageSubtitle: 'د ګټې، طلباتو، پورونو او د ګودام د ټول ارزښت لنډیز.',
+      pageTitle: 'ورځني، اونیز او میاشتني حسابداري راپورونه',
+      pageSubtitle: 'د ورځې، اونۍ او میاشتې په پای کې د پلورل شویو توکو تعداد، بیې، نغدې پیسې او د هر پیرودونکي پور وګورئ.',
       printBtn: 'راپور چاپ کړئ',
-      exportCsvBtn: 'راپور ډاونلوډ (CSV)',
+      exportCsvBtn: 'بشپړ لنډیز ډاونلوډ (CSV)',
+      periodReportTitle: 'د ورځې، اونۍ او میاشتې د پلور او پور بشپړ راپور',
+      periodReportSubtitle: 'وګورئ څومره توکي وپلورل شول، په کومه بیه، څومره نغدې پیسې راغلې او څومره پور له چا سره دی.',
+      periodDay: 'د ورځې پای',
+      periodWeek: 'د اونۍ پای',
+      periodMonth: 'د میاشتې پای',
+      reportDateLabel: 'د راپور نېټه',
+      dateRangeLabel: 'د راپور موده',
+      unitsSoldLabel: 'پلورل شوي تعداد',
+      totalSalesLabel: 'ټول پلور',
+      cashPaidLabel: 'نغدې تادیه شوې',
+      loanGivenLabel: 'په پور (قرض) ورکړل شوي',
+      itemsBreakdownTitle: 'څومره توکي او په کومه بیه وپلورل شول',
+      unitPriceLabel: 'د یوې دانې بیه',
+      cashPortionLabel: 'نغدې پیسې',
+      loanPortionLabel: 'پور (قرض)',
+      loansWithWhomTitle: 'پورونه او له چا سره دي',
+      borrowerLabel: 'پیرودونکی (له چا سره)',
+      itemAndQtyLabel: 'توکی او تعداد',
+      loanAmountLabel: 'د پور مبلغ',
+      noLoansInPeriod: 'په دې موده کې ټول پلور په نغدو شوی — هیڅ پور نشته.',
+      noSalesInPeriod: 'په دې ټاکل شوې موده کې هیڅ پلور نه دی ثبت شوی.',
+      exportPeriodCsvBtn: 'د مودې راپور ډاونلوډ (CSV)',
+      outstandingLoansTitle: 'پاتې پورونه (طلبونه)',
+      outstandingLoansSubtitle: 'هغه پیرودونکي چې لا یې حساب نه دی تصفیه کړی، د هر پور د نېټې او وروستۍ مودې سره.',
+      outstandingTotalLabel: 'ټول پاتې پورونه',
+      outstandingCustomersLabel: 'پور لرونکي پیرودونکي',
+      loanDateLabel: 'د پور نېټه',
+      paymentDeadlineLabel: 'د تادیې وروستۍ نېټه',
+      loanInvoiceLabel: 'بل شمېره',
+      deadlineOverdueLabel: 'وخت یې تېر دی',
+      deadlineDueTodayLabel: 'نن یې وخت دی',
+      deadlineUpcomingLabel: 'پاتې ورځې',
+      dueWithin48hFlag: 'تر ۴۸ ساعتو کم',
+      dueSoonCountLabel: 'په ۴۸ ساعتونو کې سررسید',
+      paymentDueBadge: 'تادیه پاتې ده',
+      remindCustomerBtn: 'پیرودونکي ته یادونه',
+      remindedLabel: 'یادونه وشوه',
+      reminderModalTitle: 'د پیرودونکي د تادیې یادونه',
+      reminderMessageLabel: 'د یادونې پیغام (د پیغام یا واټس‌اپ لپاره چمتو)',
+      copyReminderBtn: 'پیغام کاپي کړئ',
+      copiedConfirm: 'کاپي شو!',
+      callCustomerLabel: 'تلیفون کول',
+      sendSmsLabel: 'پیغام ولېږئ',
+      markRemindedBtn: 'تایید او یادونه ثبت کړئ',
+      exportLoansCsvBtn: 'د پورونو لست ډاونلوډ (CSV)',
+      noOutstandingLoans: 'دا مهال هیڅ پیرودونکی ناتادیه شوی پور نه لري.',
+      loanFilterAll: 'ټول پورونه',
+      loanFilterDueSoon: 'تر ۴۸ ساعتو کم',
+      loanFilterOverdue: 'وخت تېر شوی',
+      collectPaymentBtn: 'پیسې واخلئ',
+      payVendorBillBtn: 'بل تادیه کړئ',
+      todayBtn: 'نن',
       profitLossTitle: 'د ګټې او تاوان لنډیز',
       totalSalesCollected: 'راټول شوي پلور (عاید)',
       totalExpensesPaid: 'تادیه شوي بلونه او لګښتونه',
@@ -536,10 +932,52 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       goToPageBtn: 'هغه پاڼه پرانیزئ',
       closeBtn: 'لارښود بند کړئ',
     },
+    backup: {
+      sectionTitle: 'د معلوماتو خوندیتوب',
+      exportBtn: 'بیک اپ ډاونلوډ',
+      importBtn: 'بیک اپ بېرته راوستل',
+      exportSuccess: 'د بیک اپ فایل په بریالیتوب سره ډاونلوډ شو.',
+      importSuccess: 'بیک اپ بېرته راوستل شو. ټول حسابونه او بیلانسونه تازه شول.',
+      invalidJsonError: 'فایل ونه لوستل شو: مهرباني وکړئ سم JSON بیک اپ فایل وټاکئ.',
+      invalidStructureError: 'ناسم بیک اپ فایل: د حسابدارۍ اړین ریکارډونه پکې نشته.',
+      dismissBtn: 'سمه ده',
+    },
+    settings: {
+      pageTitle: 'د کاروونکي تنظیمات او بڼه',
+      pageSubtitle: 'یو آرام او مسلکي رنګین چوکاټ وټاکئ او ژبه، اسعار او بیک اپ مدیریت کړئ.',
+      themeSectionTitle: 'د کاریال رنګین چوکاټ (Theme)',
+      themeSectionSubtitle: 'په هر چوکاټ کې هره برخه لږ توپیر لرونکی آرام رنګ ساتي ترڅو پاڼې ژر وپېژندل شي.',
+      activeLabel: 'فعال رنګ',
+      paletteBadge: 'د ۸ پاڼو رنګ',
+      sectionColorsTitle: 'د هرې پاڼې جلا رنګ (د لیدلو لپاره پرې کلیک وکړئ)',
+      sectionColorsDesc: 'په ټاکل شوي چوکاټ کې د حسابدارۍ هره برخه خپل آرام او جلا رنګ لري.',
+      themes: {
+        classic_ledger: {
+          name: 'کلاسیک لیجر (Classic Ledger)',
+          desc: 'د مسلکي دفتر نیلي، نرم شین او اخروټي رنګونه پر روښانه سپین کاغذ.',
+        },
+        warm_parchment: {
+          name: 'تود کاغذ (Warm Parchment)',
+          desc: 'د سپین عاج کاغذ سره نسواري، زیتوني شین او نرم خاورین رنګونه.',
+        },
+        crisp_pewter: {
+          name: 'فولادي خړ (Crisp Pewter)',
+          desc: 'آرام خړ رنګ د صنوبر شین، نیلي او تود نصواري رنګونو سره.',
+        },
+        botanical_stone: {
+          name: 'طبیعي ډبره (Botanical Stone)',
+          desc: 'د اوږدو حسابونو لپاره آرام منرالي شین، تیاره فیروزه يي او شګلن رنګ.',
+        },
+      },
+      preferencesTitle: 'د ژبې او اسعارو تنظیمات',
+      preferencesSubtitle: 'هر وخت ژبه (انګلیسي، پښتو، دري) او اسعار (افغانی یا ډالر) بدل کړئ.',
+      dataSafetyTitle: 'بیک اپ او د معلوماتو خوندیتوب',
+      dataSafetyDesc: 'د خپلو حسابونو بشپړ JSON بیک اپ خوندي کړئ یا پخوانی فایل بېرته راولئ.',
+    },
   },
   fa: {
-    appName: 'حسابداری مریدین',
-    tagline: 'سیستم ساده حسابداری تجارتی',
+    appName: 'مریدین لیجر پرو',
+    tagline: 'سیستم حرفه‌ای حسابداری تجارتی',
     languageLabel: 'زبان',
     currencyLabel: 'واحد پول',
     helpBotButton: 'دستیار راهنما',
@@ -551,6 +989,7 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       banking: 'بانک و صندوق نقد',
       pos_sync: 'اصلاح فروش آفلاین',
       reports: 'گزارش‌های مالی',
+      settings: 'تنظیمات',
     },
     common: {
       save: 'ذخیره',
@@ -603,11 +1042,29 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stepPosSync: 'اصلاح فروش آفلاین',
       stepPosSyncDesc: 'رفع مشکل رسیدهای آفلاین',
       stepReports: 'گزارش‌های مالی',
-      stepReportsDesc: 'مفاد، طلبات و ارزش گدام',
+      stepReportsDesc: 'گزارش روزانه، هفته‌وار و ماهانه نقد و قرض',
       cashOnHand: 'مجموع نقد و بانک',
       moneyOwedToYou: 'طلبات از مشتریان',
       billsYouOwe: 'بدهی‌های شما',
       netProfit: 'مفاد خالص (وصول شده)',
+      quickActionsTitle: 'عملیات سریع',
+      quickActionsSubtitle: 'با یک کلیک مستقیماً به کارهای روزانه و رایج حسابداری بروید.',
+      qaRecordSale: 'ثبت فروش',
+      qaRecordSaleDesc: 'ساخت بل فروش نقدی یا قرضی',
+      qaLogPayment: 'ثبت دریافت پول',
+      qaLogPaymentDesc: 'وصول پول بل‌های پرداخت‌نشده',
+      qaUnpaidCount: 'پرداخت‌نشده',
+      qaAddCustomer: 'افزودن مشتری',
+      qaAddCustomerDesc: 'ثبت مشخصات مشتری جدید',
+      qaEnterBill: 'ثبت بل خرید',
+      qaEnterBillDesc: 'ثبت خریداری از فروشنده',
+      qaRecordExpense: 'ثبت مصرف یا واریز',
+      qaRecordExpenseDesc: 'به‌روزرسانی دخل یا بانک',
+      qaViewReports: 'گزارش روزانه و قرض‌ها',
+      qaViewReportsDesc: 'خلاصه فروش و قرض‌های باقیمانده',
+      dueSoonAlert: 'سررسید در ۴۸ ساعت آینده',
+      lowStockAlert: 'موجودی کم',
+      unpaidBillsAlert: 'پرداخت‌نشده',
     },
     customers: {
       pageTitle: 'مشتریان و بل‌های فروش',
@@ -624,6 +1081,25 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       customersListTitle: 'فهرست مشتریان',
       receivePaymentBtn: 'دریافت پول',
       balanceOwed: 'باقی‌داری مشتری',
+      printPdfBtn: 'چاپ / PDF',
+      invoicePreviewTitle: 'بل رسمی فروش (چاپ یا ذخیره PDF)',
+      printSavePdfBtn: 'چاپ / ذخیره PDF',
+      officialInvoiceHeading: 'بل رسمی فروش',
+      billToLabel: 'صورت‌حساب برای',
+      invoiceDetailsLabel: 'مشخصات بل',
+      skuLabel: 'کد جنس (SKU)',
+      subtotalLabel: 'جمع فرعی',
+      amountPaidLabel: 'مبلغ پرداخت‌شده',
+      balanceDueLabel: 'مانده قابل پرداخت',
+      paidIntoAccountLabel: 'واریز به حساب',
+      authorizedSignatureLabel: 'امضای مسئول',
+      customerSignatureLabel: 'امضای مشتری',
+      officialRecordNote: 'این سند رسمی حسابداری توسط سیستم مریدین لیجر پرو صادر شده است.',
+      filterAll: 'همه',
+      filterUnpaid: 'پرداخت‌نشده',
+      searchPlaceholder: 'جستجوی شماره بل، مشتری یا جنس...',
+      dueDateInput: 'مهلت پرداخت',
+      collectIntoLabel: 'واریز پول به حساب',
     },
     vendors: {
       pageTitle: 'تامین‌کنندگان و بل‌های پرداختنی',
@@ -639,6 +1115,9 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       payBillBtn: 'پرداخت بل',
       payFromAccount: 'پرداخت از حساب',
       amountYouOwe: 'بدهی شما',
+      filterAll: 'همه',
+      filterUnpaid: 'پرداخت‌نشده',
+      searchPlaceholder: 'جستجوی شماره بل، فروشنده یا توضیحات...',
     },
     inventory: {
       pageTitle: 'اجناس و موجودی گدام',
@@ -654,6 +1133,13 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stockListTitle: 'موجودی فعلی گدام',
       inStock: 'موجود در گدام',
       lowStock: 'موجودی کم',
+      filterAll: 'همه',
+      filterLowStock: 'موجودی کم',
+      searchPlaceholder: 'جستجوی محصول یا کد (SKU)...',
+      totalSkusLabel: 'مجموع محصولات',
+      lowStockItemsLabel: 'اجناس رو به اتمام (<= ۲)',
+      totalStockValueLabel: 'ارزش خرید گدام',
+      retailValueLabel: 'ارزش فروش',
     },
     banking: {
       pageTitle: 'بانک و صندوق نقد',
@@ -666,6 +1152,11 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       amountUsd: 'مبلغ (دالر)',
       recordBtn: 'ذخیره معامله',
       registerTitle: 'دفتر تاریخچه معاملات حساب',
+      filterAll: 'همه',
+      filterDeposits: 'واریزها',
+      filterExpenses: 'مصارف',
+      searchPlaceholder: 'جستجوی توضیحات یا حساب...',
+      allAccountsBtn: 'همه حساب‌ها',
     },
     posSync: {
       pageTitle: 'اصلاح رسیدهای آفلاین (حالت ساده)',
@@ -690,12 +1181,69 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       notePlaceholder: 'دلیل کوتاه بنویسید (مثلاً: تخفیف با اجازه مدیر)...',
       availablePhonesLabel: 'گوشی‌های آماده در گدام (برای انتخاب خودکار کلیک کنید):',
       fixedBanner: 'انجام شد! رسید اصلاح گردید و در حساب ثبت شد.',
+      resolutionLogTitle: 'تاریخچه اصلاحات اخیر',
+      noLogs: 'هنوز هیچ اصلاحی ثبت نشده است.',
+      actionReassigned: 'تعویض IMEI',
+      actionOverride: 'تایید مدیر',
+      actionVoided: 'لغو شده',
     },
     reports: {
-      pageTitle: 'گزارش‌های ساده مالی',
-      pageSubtitle: 'خلاصه فوری مفاد، طلبات مشتریان، بل‌های پرداختنی و ارزش گدام.',
+      pageTitle: 'گزارش‌های روزانه، هفته‌وار و ماهانه حسابداری',
+      pageSubtitle: 'خلاصه کامل پایان روز، هفته و ماه: تعداد اجناس فروخته‌شده، قیمت، پول نقد دریافت‌شده و قرض‌های مشتریان.',
       printBtn: 'چاپ گزارش',
-      exportCsvBtn: 'دانلود خلاصه (CSV)',
+      exportCsvBtn: 'دانلود خلاصه کل (CSV)',
+      periodReportTitle: 'گزارش فروش، پول نقد و قرض در پایان دوره',
+      periodReportSubtitle: 'ببینید چند عدد جنس به چه قیمتی فروخته شد، چقدر پول نقد گرفته شد و چقدر قرض نزد کدام مشتری است.',
+      periodDay: 'پایان روز',
+      periodWeek: 'پایان هفته',
+      periodMonth: 'پایان ماه',
+      reportDateLabel: 'تاریخ گزارش',
+      dateRangeLabel: 'بازه زمانی',
+      unitsSoldLabel: 'تعداد فروخته‌شده',
+      totalSalesLabel: 'مجموع فروش دوره',
+      cashPaidLabel: 'پرداخت‌شده به نقد',
+      loanGivenLabel: 'فروش به قرض (نسیه)',
+      itemsBreakdownTitle: 'چند عدد و به چه قیمت فروخته شد',
+      unitPriceLabel: 'قیمت فی واحد',
+      cashPortionLabel: 'پول نقد',
+      loanPortionLabel: 'قرض (نسیه)',
+      loansWithWhomTitle: 'قرض‌ها و نزد چه کسی است',
+      borrowerLabel: 'مشتری (نزد چه کسی)',
+      itemAndQtyLabel: 'جنس و تعداد',
+      loanAmountLabel: 'مبلغ قرض',
+      noLoansInPeriod: 'تمام فروش‌های این دوره نقدی بوده است — هیچ قرضی وجود ندارد.',
+      noSalesInPeriod: 'در این دوره هیچ فروشی ثبت نشده است.',
+      exportPeriodCsvBtn: 'دانلود گزارش دوره (CSV)',
+      outstandingLoansTitle: 'قرض‌های پرداخت‌نشده مشتریان',
+      outstandingLoansSubtitle: 'فهرست مشتریان قرضدار همراه با تاریخ هر قرض و مهلت پرداخت برای مدیریت دقیق طلبات.',
+      outstandingTotalLabel: 'مجموع قرض‌های باقیمانده',
+      outstandingCustomersLabel: 'مشتریان دارای قرض',
+      loanDateLabel: 'تاریخ قرض',
+      paymentDeadlineLabel: 'مهلت پرداخت',
+      loanInvoiceLabel: 'شماره بل',
+      deadlineOverdueLabel: 'گذشته از مهلت',
+      deadlineDueTodayLabel: 'سررسید امروز',
+      deadlineUpcomingLabel: 'روز باقیمانده',
+      dueWithin48hFlag: 'کمتر از ۴۸ ساعت',
+      dueSoonCountLabel: 'در ۴۸ ساعت آینده',
+      paymentDueBadge: 'سررسید پرداخت',
+      remindCustomerBtn: 'یادآوری به مشتری',
+      remindedLabel: 'یادآوری شد',
+      reminderModalTitle: 'یادآوری پرداخت مشتری',
+      reminderMessageLabel: 'متن یادآوری (آماده ارسال در پیامک / واتساپ)',
+      copyReminderBtn: 'کاپی پیام',
+      copiedConfirm: 'کاپی شد!',
+      callCustomerLabel: 'تماس تلفنی',
+      sendSmsLabel: 'ارسال پیامک',
+      markRemindedBtn: 'تایید و ثبت یادآوری',
+      exportLoansCsvBtn: 'دانلود فهرست قرض‌ها (CSV)',
+      noOutstandingLoans: 'در حال حاضر هیچ مشتری قرض پرداخت‌نشده‌ای ندارد.',
+      loanFilterAll: 'همه قرض‌ها',
+      loanFilterDueSoon: 'کمتر از ۴۸ ساعت',
+      loanFilterOverdue: 'گذشته از مهلت',
+      collectPaymentBtn: 'دریافت پول',
+      payVendorBillBtn: 'پرداخت بل',
+      todayBtn: 'امروز',
       profitLossTitle: 'خلاصه مفاد و ضرر',
       totalSalesCollected: 'فروش وصول‌شده (درآمد)',
       totalExpensesPaid: 'بل‌ها و مصارف پرداخت‌شده',
@@ -716,6 +1264,48 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stepsLabel: 'این مراحل ساده را دنبال کنید:',
       goToPageBtn: 'رفتن به آن صفحه',
       closeBtn: 'بستن راهنما',
+    },
+    backup: {
+      sectionTitle: 'پشتیبان‌گیری و امنیت معلومات',
+      exportBtn: 'پشتیبان‌گیری (Backup)',
+      importBtn: 'بازیابی نسخه پشتیبان',
+      exportSuccess: 'فایل پشتیبان با موفقیت دانلود شد.',
+      importSuccess: 'نسخه پشتیبان بازیابی شد. تمام حساب‌ها و موجودی‌ها به‌روزرسانی گردید.',
+      invalidJsonError: 'خطا در خواندن فایل: لطفاً یک فایل پشتیبان معتبر JSON انتخاب کنید.',
+      invalidStructureError: 'فایل پشتیبان نامعتبر است: اطلاعات ضروری حسابداری در آن یافت نشد.',
+      dismissBtn: 'تایید',
+    },
+    settings: {
+      pageTitle: 'تنظیمات کاربر و ظاهر برنامه',
+      pageSubtitle: 'یک تم رنگی ملایم و حرفه‌ای انتخاب کنید و زبان، واحد پول و پشتیبان‌گیری را مدیریت نمایید.',
+      themeSectionTitle: 'تم رنگی محیط برنامه',
+      themeSectionSubtitle: 'هر تم رنگ ملایم و متمایزی برای هر بخش حسابداری حفظ می‌کند تا کار راحت و چشم‌نواز باشد.',
+      activeLabel: 'تم فعال',
+      paletteBadge: 'پالت ۸ صفحه‌ای',
+      sectionColorsTitle: 'رنگ متمایز هر بخش (برای مشاهده کلیک کنید)',
+      sectionColorsDesc: 'در تم انتخاب‌شده، هر صفحه حسابداری رنگ ملایم و اختصاصی خود را دارد.',
+      themes: {
+        classic_ledger: {
+          name: 'دفتر کلاسیک (Classic Ledger)',
+          desc: 'سرمه‌ای اداری، سبز ملایم و گردویی روی پس‌زمینه کاغذی روشن.',
+        },
+        warm_parchment: {
+          name: 'کاغذ گرم (Warm Parchment)',
+          desc: 'کاغذ عاجی گرم همراه با رنگ‌های قهوه‌ای برنز، زیتونی و خاکی ملایم.',
+        },
+        crisp_pewter: {
+          name: 'خاکستری فولادی (Crisp Pewter)',
+          desc: 'خنثای گرافیتی شیک با رنگ‌های کاج تیره، سرمه‌ای و اخرایی ملایم.',
+        },
+        botanical_stone: {
+          name: 'سنگ گیاهی (Botanical Stone)',
+          desc: 'سبز معدنی آرام، فیروزه‌ای تیره و ماسه‌ای ملایم برای کار طولانی‌مدت.',
+        },
+      },
+      preferencesTitle: 'تنظیمات زبان و واحد پول',
+      preferencesSubtitle: 'هر زمان می‌توانید زبان نمایش (انگلیسی، پشتو، دری) و واحد پول را تغییر دهید.',
+      dataSafetyTitle: 'مدیریت پشتیبان‌گیری و معلومات',
+      dataSafetyDesc: 'نسخه کامل JSON تمام حساب‌های خود را ذخیره کنید یا از فایل قبلی بازیابی نمایید.',
     },
   },
 };

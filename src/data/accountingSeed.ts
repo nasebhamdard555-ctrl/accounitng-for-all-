@@ -1,5 +1,23 @@
 import type { AccountingState } from '../types/accounting';
 
+function shiftUtcIsoDate(baseIso: string, deltaDays: number): string {
+  const [y, m, d] = baseIso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + deltaDays));
+  return dt.toISOString().slice(0, 10);
+}
+
+function getMonthEarlierDate(todayIso: string): string {
+  const [y, m, d] = todayIso.split('-').map(Number);
+  if (d >= 10) {
+    return `${y}-${String(m).padStart(2, '0')}-02`;
+  }
+  return shiftUtcIsoDate(todayIso, -1);
+}
+
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const THREE_DAYS_AGO_ISO = shiftUtcIsoDate(TODAY_ISO, -3);
+const MONTH_EARLIER_ISO = getMonthEarlierDate(TODAY_ISO);
+
 export const SEED_ACCOUNTING_STATE: AccountingState = {
   currency: 'AFN',
   customers: [
@@ -24,8 +42,30 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       city: 'Kandahar',
       balanceUsd: 799,
     },
+    {
+      id: 'cust-4',
+      name: 'Herat Mobile Bazaar',
+      phone: '0791-504-312',
+      city: 'Herat',
+      balanceUsd: 0,
+    },
   ],
   invoices: [
+    {
+      id: 'inv-4',
+      invoiceNumber: 'INV-1042',
+      customerId: 'cust-4',
+      customerName: 'Herat Mobile Bazaar',
+      productId: 'prod-3',
+      productName: 'Pixel 9 Pro 128GB',
+      quantity: 1,
+      unitPriceUsd: 899,
+      totalUsd: 899,
+      date: TODAY_ISO,
+      dueDate: shiftUtcIsoDate(TODAY_ISO, 14),
+      status: 'paid',
+      paidToAccountId: 'acct-cash',
+    },
     {
       id: 'inv-1',
       invoiceNumber: 'INV-1041',
@@ -36,8 +76,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       quantity: 1,
       unitPriceUsd: 1199,
       totalUsd: 1199,
-      date: '2026-11-12',
-      dueDate: '2026-11-26',
+      date: TODAY_ISO,
+      dueDate: shiftUtcIsoDate(TODAY_ISO, 14),
       status: 'unpaid',
     },
     {
@@ -50,8 +90,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       quantity: 2,
       unitPriceUsd: 1299,
       totalUsd: 2598,
-      date: '2026-11-10',
-      dueDate: '2026-11-24',
+      date: THREE_DAYS_AGO_ISO,
+      dueDate: shiftUtcIsoDate(THREE_DAYS_AGO_ISO, 14),
       status: 'paid',
       paidToAccountId: 'acct-bank',
     },
@@ -65,8 +105,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       quantity: 1,
       unitPriceUsd: 799,
       totalUsd: 799,
-      date: '2026-11-08',
-      dueDate: '2026-11-22',
+      date: MONTH_EARLIER_ISO,
+      dueDate: shiftUtcIsoDate(TODAY_ISO, 1),
       status: 'unpaid',
     },
   ],
@@ -101,8 +141,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       vendorName: 'Kabul Wholesale Electronics',
       description: 'Restock: 2x iPhone 16 Pro & Accessories',
       totalUsd: 1850,
-      date: '2026-11-11',
-      dueDate: '2026-11-25',
+      date: shiftUtcIsoDate(TODAY_ISO, -2),
+      dueDate: shiftUtcIsoDate(TODAY_ISO, 12),
       status: 'unpaid',
     },
     {
@@ -112,8 +152,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       vendorName: 'Mazar Fiber & Office Supply',
       description: 'Store Receipt Paper & Internet Plan',
       totalUsd: 240,
-      date: '2026-11-09',
-      dueDate: '2026-11-20',
+      date: shiftUtcIsoDate(TODAY_ISO, -4),
+      dueDate: shiftUtcIsoDate(TODAY_ISO, 10),
       status: 'unpaid',
     },
     {
@@ -123,8 +163,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       vendorName: 'Gulf Smart Devices Trading',
       description: 'Galaxy S25 Ultra Wholesale Batch',
       totalUsd: 2100,
-      date: '2026-11-05',
-      dueDate: '2026-11-19',
+      date: MONTH_EARLIER_ISO,
+      dueDate: shiftUtcIsoDate(MONTH_EARLIER_ISO, 14),
       status: 'paid',
       paidFromAccountId: 'acct-bank',
     },
@@ -183,8 +223,17 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
   ],
   bankTransactions: [
     {
+      id: 'tx-4',
+      date: TODAY_ISO,
+      accountId: 'acct-cash',
+      accountName: 'Main Cash Register (Kabul)',
+      type: 'payment_received',
+      description: 'Cash payment for INV-1042 (Herat Mobile Bazaar)',
+      amountUsd: 899,
+    },
+    {
       id: 'tx-1',
-      date: '2026-11-10',
+      date: THREE_DAYS_AGO_ISO,
       accountId: 'acct-bank',
       accountName: 'Azizi / AIB Business Account',
       type: 'payment_received',
@@ -193,7 +242,7 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
     },
     {
       id: 'tx-2',
-      date: '2026-11-05',
+      date: MONTH_EARLIER_ISO,
       accountId: 'acct-bank',
       accountName: 'Azizi / AIB Business Account',
       type: 'bill_paid',
@@ -202,12 +251,12 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
     },
     {
       id: 'tx-3',
-      date: '2026-11-03',
+      date: MONTH_EARLIER_ISO,
       accountId: 'acct-cash',
       accountName: 'Main Cash Register (Kabul)',
       type: 'deposit',
       description: 'Opening till cash float',
-      amountUsd: 3450,
+      amountUsd: 2551,
     },
   ],
 };

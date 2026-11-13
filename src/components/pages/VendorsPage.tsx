@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { CheckCircle2, FileText, Receipt, Users } from 'lucide-react';
+import { CheckCircle2, FileText, Receipt, Search, Users } from 'lucide-react';
 import type { TranslationDict } from '../../i18n/translations';
 import type { AccountingState } from '../../types/accounting';
 import { formatAmount } from '../../utils/accountingEngine';
-import { PAGE_THEMES } from '../../utils/pageThemes';
+import { usePageTheme } from '../../utils/ThemeContext';
 
 interface VendorsPageProps {
   state: AccountingState;
@@ -26,7 +26,7 @@ export function VendorsPage({
   onAddVendor,
   t,
 }: VendorsPageProps) {
-  const theme = PAGE_THEMES.vendors;
+  const theme = usePageTheme('vendors');
   const [vendorId, setVendorId] = useState(state.vendors[0]?.id || '');
   const [description, setDescription] = useState('');
   const [billAmountUsd, setBillAmountUsd] = useState('250');
@@ -35,12 +35,33 @@ export function VendorsPage({
   const [newVendName, setNewVendName] = useState('');
   const [newVendPhone, setNewVendPhone] = useState('');
   const [newVendCity, setNewVendCity] = useState('Kabul');
+  const [billFilter, setBillFilter] = useState<'all' | 'unpaid'>('all');
+  const [billSearch, setBillSearch] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+
+  const activeVendorId = state.vendors.some((v) => v.id === vendorId)
+    ? vendorId
+    : state.vendors[0]?.id || '';
+  const activePayAccountId = state.bankAccounts.some((a) => a.id === payAccountId)
+    ? payAccountId
+    : state.bankAccounts[1]?.id || state.bankAccounts[0]?.id || '';
+
+  const unpaidBillsCount = state.bills.filter((b) => b.status === 'unpaid').length;
+  const normalizedBillSearch = billSearch.trim().toLowerCase();
+  const visibleBills = state.bills.filter((b) => {
+    if (billFilter === 'unpaid' && b.status !== 'unpaid') return false;
+    if (!normalizedBillSearch) return true;
+    return (
+      b.billNumber.toLowerCase().includes(normalizedBillSearch) ||
+      b.vendorName.toLowerCase().includes(normalizedBillSearch) ||
+      b.description.toLowerCase().includes(normalizedBillSearch)
+    );
+  });
 
   const handleSaveBill = (e: React.FormEvent) => {
     e.preventDefault();
     const res = onCreateBill({
-      vendorId,
+      vendorId: activeVendorId,
       description,
       totalUsd: Number(billAmountUsd),
     });
@@ -70,7 +91,7 @@ export function VendorsPage({
   };
 
   const handlePay = (billId: string) => {
-    const res = onPayBill(billId, payAccountId);
+    const res = onPayBill(billId, activePayAccountId);
     if (!res.ok) {
       setFeedback({ type: 'err', text: res.error || 'Payment failed.' });
     } else {
@@ -124,7 +145,7 @@ export function VendorsPage({
                 </label>
                 <select
                   id="bill-vendor"
-                  value={vendorId}
+                  value={activeVendorId}
                   onChange={(e) => setVendorId(e.target.value)}
                   className={`w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 ${theme.accentRing}`}
                 >
@@ -173,7 +194,7 @@ export function VendorsPage({
                 </label>
                 <select
                   id="pay-acct"
-                  value={payAccountId}
+                  value={activePayAccountId}
                   onChange={(e) => setPayAccountId(e.target.value)}
                   className="bg-white border border-slate-300 rounded-md px-2.5 py-1.5 text-xs text-slate-900"
                 >
@@ -256,10 +277,57 @@ export function VendorsPage({
 
         {/* Bills Table */}
         <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-slate-200">
+          <div className="px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-display text-base font-bold text-slate-900">
               {t.vendors.billsListTitle}
             </h2>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="relative">
+                <Search
+                  size={14}
+                  className="text-slate-400 absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                  aria-hidden="true"
+                />
+                <input
+                  type="search"
+                  value={billSearch}
+                  onChange={(e) => setBillSearch(e.target.value)}
+                  placeholder={t.vendors.searchPlaceholder}
+                  aria-label={t.vendors.searchPlaceholder}
+                  className={`bg-white border border-slate-300 rounded-md ps-8 pe-3 py-1.5 text-xs text-slate-900 w-full sm:w-64 focus:outline-none focus:ring-2 ${theme.accentRing}`}
+                />
+              </div>
+              <div
+                role="group"
+                aria-label={t.vendors.billsListTitle}
+                className="flex items-center gap-1 bg-slate-100 p-1 rounded"
+              >
+                <button
+                  type="button"
+                  onClick={() => setBillFilter('all')}
+                  aria-pressed={billFilter === 'all'}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap ${
+                    billFilter === 'all'
+                      ? `${theme.accentBg} text-white`
+                      : 'text-slate-700 hover:bg-white'
+                  }`}
+                >
+                  {t.vendors.filterAll} ({state.bills.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillFilter('unpaid')}
+                  aria-pressed={billFilter === 'unpaid'}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap ${
+                    billFilter === 'unpaid'
+                      ? `${theme.accentBg} text-white`
+                      : 'text-slate-700 hover:bg-white'
+                  }`}
+                >
+                  {t.vendors.filterUnpaid} ({unpaidBillsCount})
+                </button>
+              </div>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-start border-collapse">
@@ -275,41 +343,49 @@ export function VendorsPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {state.bills.map((bill) => (
-                  <tr key={bill.id} className="hover:bg-[#F5EFE7]/60">
-                    <td className="px-4 py-3 font-mono text-sm font-semibold text-slate-900 tabular-nums whitespace-nowrap">
-                      {bill.billNumber}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-medium text-slate-900">{bill.vendorName}</td>
-                    <td className="px-4 py-3 text-sm text-slate-700">{bill.description}</td>
-                    <td className="px-4 py-3 text-xs text-slate-600 tabular-nums whitespace-nowrap">{bill.dueDate}</td>
-                    <td className="px-4 py-3 text-sm font-semibold text-slate-900 tabular-nums text-end whitespace-nowrap">
-                      {formatAmount(bill.totalUsd, state.currency)}
-                    </td>
-                    <td className="px-4 py-3 text-xs font-semibold whitespace-nowrap">
-                      {bill.status === 'paid' ? (
-                        <span className="inline-flex items-center gap-1 text-[#2E6B52]">
-                          <CheckCircle2 size={13} aria-hidden="true" />
-                          <span>{t.common.paid}</span>
-                        </span>
-                      ) : (
-                        <span className="text-[#8C3B3B]">{t.common.unpaid}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-end whitespace-nowrap">
-                      {bill.status === 'unpaid' && (
-                        <button
-                          type="button"
-                          onClick={() => handlePay(bill.id)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white ${theme.accentBg} ${theme.accentHover} rounded transition-colors`}
-                        >
-                          <Receipt size={12} aria-hidden="true" />
-                          <span>{t.vendors.payBillBtn}</span>
-                        </button>
-                      )}
+                {visibleBills.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-6 text-center text-sm text-slate-500">
+                      {t.common.noRecords}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  visibleBills.map((bill) => (
+                    <tr key={bill.id} className="hover:bg-slate-50/80">
+                      <td className="px-4 py-3 font-mono text-sm font-semibold text-slate-900 tabular-nums whitespace-nowrap">
+                        {bill.billNumber}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-slate-900">{bill.vendorName}</td>
+                      <td className="px-4 py-3 text-sm text-slate-700">{bill.description}</td>
+                      <td className="px-4 py-3 text-xs text-slate-600 tabular-nums whitespace-nowrap">{bill.dueDate}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-slate-900 tabular-nums text-end whitespace-nowrap">
+                        {formatAmount(bill.totalUsd, state.currency)}
+                      </td>
+                      <td className="px-4 py-3 text-xs font-semibold whitespace-nowrap">
+                        {bill.status === 'paid' ? (
+                          <span className="inline-flex items-center gap-1 text-[#2E6B52]">
+                            <CheckCircle2 size={13} aria-hidden="true" />
+                            <span>{t.common.paid}</span>
+                          </span>
+                        ) : (
+                          <span className="text-[#8C3B3B]">{t.common.unpaid}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-end whitespace-nowrap">
+                        {bill.status === 'unpaid' && (
+                          <button
+                            type="button"
+                            onClick={() => handlePay(bill.id)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white ${theme.accentBg} ${theme.accentHover} rounded transition-colors`}
+                          >
+                            <Receipt size={12} aria-hidden="true" />
+                            <span>{t.vendors.payBillBtn}</span>
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -319,7 +395,7 @@ export function VendorsPage({
         <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
           <div className="px-5 py-3.5 border-b border-slate-200">
             <h2 className="font-display text-base font-bold text-slate-900">
-              {t.vendors.vendorsListTitle}
+              {t.vendors.vendorsListTitle} ({state.vendors.length})
             </h2>
           </div>
           <div className="overflow-x-auto">
@@ -334,7 +410,7 @@ export function VendorsPage({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {state.vendors.map((v) => (
-                  <tr key={v.id}>
+                  <tr key={v.id} className="hover:bg-slate-50/80">
                     <td className="px-4 py-3 text-sm font-medium text-slate-900">{v.name}</td>
                     <td className="px-4 py-3 text-sm font-mono text-slate-600">{v.phone}</td>
                     <td className="px-4 py-3 text-sm text-slate-700">{v.city}</td>

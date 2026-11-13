@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Minus, PackagePlus, Plus } from 'lucide-react';
+import { Minus, PackagePlus, Plus, Search } from 'lucide-react';
 import type { TranslationDict } from '../../i18n/translations';
 import type { AccountingState } from '../../types/accounting';
-import { formatAmount } from '../../utils/accountingEngine';
-import { PAGE_THEMES } from '../../utils/pageThemes';
+import { computeAccountingSummary, formatAmount } from '../../utils/accountingEngine';
+import { usePageTheme } from '../../utils/ThemeContext';
 
 interface InventoryPageProps {
   state: AccountingState;
@@ -25,14 +25,30 @@ export function InventoryPage({
   onAdjustStock,
   t,
 }: InventoryPageProps) {
-  const theme = PAGE_THEMES.inventory;
+  const theme = usePageTheme('inventory');
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
   const [category, setCategory] = useState('Smartphones');
   const [costUsd, setCostUsd] = useState('500');
   const [priceUsd, setPriceUsd] = useState('620');
   const [stockQty, setStockQty] = useState('5');
+  const [stockFilter, setStockFilter] = useState<'all' | 'low'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+
+  const summary = computeAccountingSummary(state);
+  const lowStockCount = state.products.filter((p) => p.stockQty <= 2).length;
+  const totalUnits = state.products.reduce((sum, p) => sum + p.stockQty, 0);
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const visibleProducts = state.products.filter((p) => {
+    if (stockFilter === 'low' && p.stockQty > 2) return false;
+    if (!normalizedSearch) return true;
+    return (
+      p.name.toLowerCase().includes(normalizedSearch) ||
+      p.sku.toLowerCase().includes(normalizedSearch) ||
+      p.category.toLowerCase().includes(normalizedSearch)
+    );
+  });
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +96,48 @@ export function InventoryPage({
             </button>
           </div>
         )}
+
+        {/* Inventory Summary Strip */}
+        <section aria-label={t.inventory.stockListTitle} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <button
+            type="button"
+            onClick={() => setStockFilter('all')}
+            className={`bg-white border ${theme.cardBorder} hover:border-slate-300 rounded-lg p-4 text-start transition-colors`}
+          >
+            <p className="text-xs font-medium text-slate-500">{t.inventory.totalSkusLabel}</p>
+            <p className={`font-display text-xl font-bold ${theme.headingText} tabular-nums mt-1`}>
+              {state.products.length}{' '}
+              <span className="text-xs font-normal text-slate-500">({totalUnits} {t.common.quantity})</span>
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setStockFilter((prev) => (prev === 'low' ? 'all' : 'low'))}
+            className={`bg-white border ${
+              stockFilter === 'low' ? theme.navActiveBorder : theme.cardBorder
+            } hover:border-slate-300 rounded-lg p-4 text-start transition-colors`}
+          >
+            <p className="text-xs font-medium text-slate-500">{t.inventory.lowStockItemsLabel}</p>
+            <p
+              className={`font-display text-xl font-bold tabular-nums mt-1 ${
+                lowStockCount > 0 ? 'text-[#8C3B3B]' : theme.accentText
+              }`}
+            >
+              {lowStockCount}
+            </p>
+          </button>
+
+          <div className={`bg-white border ${theme.cardBorder} rounded-lg p-4`}>
+            <p className="text-xs font-medium text-slate-500">{t.inventory.totalStockValueLabel}</p>
+            <p className={`font-display text-xl font-bold ${theme.accentText} tabular-nums mt-1`}>
+              {formatAmount(summary.totalInventoryCostUsd, state.currency)}
+            </p>
+            <p className="text-xs text-slate-500 tabular-nums mt-0.5">
+              {t.inventory.retailValueLabel}: {formatAmount(summary.totalInventoryRetailUsd, state.currency)}
+            </p>
+          </div>
+        </section>
 
         <form
           onSubmit={handleAdd}
@@ -186,10 +244,57 @@ export function InventoryPage({
         </form>
 
         <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-slate-200">
+          <div className="px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-display text-base font-bold text-slate-900">
               {t.inventory.stockListTitle}
             </h2>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="relative">
+                <Search
+                  size={14}
+                  className="text-slate-400 absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                  aria-hidden="true"
+                />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t.inventory.searchPlaceholder}
+                  aria-label={t.inventory.searchPlaceholder}
+                  className={`bg-white border border-slate-300 rounded-md ps-8 pe-3 py-1.5 text-xs text-slate-900 w-full sm:w-56 focus:outline-none focus:ring-2 ${theme.accentRing}`}
+                />
+              </div>
+              <div
+                role="group"
+                aria-label={t.inventory.stockListTitle}
+                className="flex items-center gap-1 bg-slate-100 p-1 rounded"
+              >
+                <button
+                  type="button"
+                  onClick={() => setStockFilter('all')}
+                  aria-pressed={stockFilter === 'all'}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap ${
+                    stockFilter === 'all'
+                      ? `${theme.accentBg} text-white`
+                      : 'text-slate-700 hover:bg-white'
+                  }`}
+                >
+                  {t.inventory.filterAll} ({state.products.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStockFilter('low')}
+                  aria-pressed={stockFilter === 'low'}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap ${
+                    stockFilter === 'low'
+                      ? `${theme.accentBg} text-white`
+                      : 'text-slate-700 hover:bg-white'
+                  }`}
+                >
+                  {t.inventory.filterLowStock} ({lowStockCount})
+                </button>
+              </div>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-start border-collapse">
@@ -204,49 +309,57 @@ export function InventoryPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {state.products.map((prod) => (
-                  <tr key={prod.id} className="hover:bg-[#EEF0F7]/70">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-600 whitespace-nowrap">{prod.sku}</td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-slate-900">{prod.name}</div>
-                      <div className="text-xs text-slate-500">{prod.category}</div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-700 tabular-nums text-end whitespace-nowrap">
-                      {formatAmount(prod.costUsd, state.currency)}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-slate-900 tabular-nums text-end whitespace-nowrap">
-                      {formatAmount(prod.priceUsd, state.currency)}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-semibold tabular-nums text-end whitespace-nowrap">
-                      <span className={prod.stockQty <= 2 ? 'text-[#8C3B3B]' : theme.accentText}>
-                        {prod.stockQty}
-                      </span>
-                      <span className="text-xs text-slate-500 ms-1.5">
-                        ({prod.stockQty <= 2 ? t.inventory.lowStock : t.inventory.inStock})
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-end whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => onAdjustStock(prod.id, -1)}
-                          aria-label={`Decrease stock for ${prod.name}`}
-                          className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 transition-colors"
-                        >
-                          <Minus size={13} aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onAdjustStock(prod.id, 1)}
-                          aria-label={`Increase stock for ${prod.name}`}
-                          className={`p-1.5 ${theme.softButtonBg} rounded ${theme.softButtonText} transition-colors`}
-                        >
-                          <Plus size={13} aria-hidden="true" />
-                        </button>
-                      </div>
+                {visibleProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-6 text-center text-sm text-slate-500">
+                      {t.common.noRecords}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  visibleProducts.map((prod) => (
+                    <tr key={prod.id} className="hover:bg-slate-50/80">
+                      <td className="px-4 py-3 font-mono text-xs text-slate-600 whitespace-nowrap">{prod.sku}</td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-medium text-slate-900">{prod.name}</div>
+                        <div className="text-xs text-slate-500">{prod.category}</div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-700 tabular-nums text-end whitespace-nowrap">
+                        {formatAmount(prod.costUsd, state.currency)}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold text-slate-900 tabular-nums text-end whitespace-nowrap">
+                        {formatAmount(prod.priceUsd, state.currency)}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold tabular-nums text-end whitespace-nowrap">
+                        <span className={prod.stockQty <= 2 ? 'text-[#8C3B3B]' : theme.accentText}>
+                          {prod.stockQty}
+                        </span>
+                        <span className="text-xs text-slate-500 ms-1.5">
+                          ({prod.stockQty <= 2 ? t.inventory.lowStock : t.inventory.inStock})
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-end whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => onAdjustStock(prod.id, -1)}
+                            aria-label={`Decrease stock for ${prod.name}`}
+                            className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 transition-colors"
+                          >
+                            <Minus size={13} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onAdjustStock(prod.id, 1)}
+                            aria-label={`Increase stock for ${prod.name}`}
+                            className={`p-1.5 ${theme.softButtonBg} rounded ${theme.softButtonText} transition-colors`}
+                          >
+                            <Plus size={13} aria-hidden="true" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

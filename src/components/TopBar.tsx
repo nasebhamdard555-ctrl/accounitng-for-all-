@@ -30,7 +30,7 @@ export function TopBar({
       <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-4 md:gap-8">
         <div className="flex items-center shrink-0">
           <span className="font-display text-lg font-bold tracking-tight text-slate-900 whitespace-nowrap shrink-0">
-            Meridian Sync
+            Meridian Ledger Pro
           </span>
         </div>
 

@@ -3,7 +3,15 @@ import type {
   BankTransaction,
   CurrencyCode,
   Customer,
+  CustomerOutstandingLoans,
+  OutstandingLoanItem,
+  OutstandingLoansReport,
+  PeriodItemLine,
+  PeriodLoanCustomerTotal,
+  PeriodLoanEntry,
+  PeriodSalesReport,
   ProductItem,
+  ReportPeriod,
   SalesInvoice,
   Vendor,
   VendorBill,
@@ -49,7 +57,14 @@ export function addCustomer(
 
 export function createSalesInvoice(
   state: AccountingState,
-  input: { customerId: string; productId: string; quantity: number; markPaidImmediately?: boolean; accountId?: string }
+  input: {
+    customerId: string;
+    productId: string;
+    quantity: number;
+    markPaidImmediately?: boolean;
+    accountId?: string;
+    dueDate?: string;
+  }
 ): { ok: true; state: AccountingState; invoice: SalesInvoice } | { ok: false; error: string } {
   const customer = state.customers.find((c) => c.id === input.customerId);
   if (!customer) {
@@ -71,7 +86,9 @@ export function createSalesInvoice(
   }
 
   const today = new Date().toISOString().slice(0, 10);
-  const due = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+  const defaultDue = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+  const due =
+    input.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(input.dueDate) ? input.dueDate : defaultDue;
   const nextNum = 1042 + state.invoices.length;
   const totalUsd = Number((product.priceUsd * qty).toFixed(2));
   const isPaid = Boolean(input.markPaidImmediately);
@@ -464,5 +481,293 @@ export function computeAccountingSummary(state: AccountingState): AccountingSumm
     paidRevenueUsd,
     paidExpensesUsd,
     netProfitUsd,
+  };
+}
+
+function shiftIsoDate(baseIso: string, deltaDays: number): string {
+  const parts = baseIso.split('-').map(Number);
+  if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) {
+    return new Date().toISOString().slice(0, 10);
+  }
+  const [y, m, d] = parts;
+  return new Date(Date.UTC(y, m - 1, d + deltaDays)).toISOString().slice(0, 10);
+}
+
+function getMonthBounds(anchorDate: string): { startDate: string; endDate: string } {
+  const parts = anchorDate.split('-').map(Number);
+  if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) {
+    const today = new Date().toISOString().slice(0, 10);
+    return getMonthBounds(today);
+  }
+  const [y, m] = parts;
+  const startDate = `${y}-${String(m).padStart(2, '0')}-01`;
+  const lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const endDate = `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  return { startDate, endDate };
+}
+
+export function computePeriodSalesReport(
+  state: AccountingState,
+  period: ReportPeriod,
+  anchorDateIso?: string
+): PeriodSalesReport {
+  const anchorDate =
+    anchorDateIso && /^\d{4}-\d{2}-\d{2}$/.test(anchorDateIso)
+      ? anchorDateIso
+      : new Date().toISOString().slice(0, 10);
+
+  let startDate = anchorDate;
+  let endDate = anchorDate;
+
+  if (period === 'week') {
+    startDate = shiftIsoDate(anchorDate, -6);
+    endDate = anchorDate;
+  } else if (period === 'month') {
+    const bounds = getMonthBounds(anchorDate);
+    startDate = bounds.startDate;
+    endDate = bounds.endDate;
+  }
+
+  const matchedInvoices = state.invoices
+    .filter((inv) => inv.date >= startDate && inv.date <= endDate)
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const customerMap = new Map(state.customers.map((c) => [c.id, c]));
+  const itemGroups = new Map<string, PeriodItemLine>();
+  const loanEntries: PeriodLoanEntry[] = [];
+  const loanCustomerMap = new Map<string, PeriodLoanCustomerTotal>();
+
+  let totalUnitsSold = 0;
+  let totalSalesUsd = 0;
+  let cashPaidUsd = 0;
+  let cashInvoiceCount = 0;
+  let loanUsd = 0;
+  let loanInvoiceCount = 0;
+
+  for (const inv of matchedInvoices) {
+    totalUnitsSold += inv.quantity;
+    totalSalesUsd = Number((totalSalesUsd + inv.totalUsd).toFixed(2));
+
+    const isPaid = inv.status === 'paid';
+    if (isPaid) {
+      cashPaidUsd = Number((cashPaidUsd + inv.totalUsd).toFixed(2));
+      cashInvoiceCount += 1;
+    } else {
+      loanUsd = Number((loanUsd + inv.totalUsd).toFixed(2));
+      loanInvoiceCount += 1;
+
+      const cust = customerMap.get(inv.customerId);
+      const phone = cust?.phone || '—';
+      const city = cust?.city || '—';
+
+      loanEntries.push({
+        invoiceId: inv.id,
+        invoiceNumber: inv.invoiceNumber,
+        date: inv.date,
+        dueDate: inv.dueDate,
+        customerId: inv.customerId,
+        customerName: inv.customerName,
+        customerPhone: phone,
+        customerCity: city,
+        productName: inv.productName,
+        quantity: inv.quantity,
+        unitPriceUsd: inv.unitPriceUsd,
+        loanAmountUsd: inv.totalUsd,
+      });
+
+      const existingCust = loanCustomerMap.get(inv.customerId);
+      if (existingCust) {
+        existingCust.invoiceCount += 1;
+        existingCust.totalLoanUsd = Number(
+          (existingCust.totalLoanUsd + inv.totalUsd).toFixed(2)
+        );
+      } else {
+        loanCustomerMap.set(inv.customerId, {
+          customerId: inv.customerId,
+          customerName: inv.customerName,
+          customerPhone: phone,
+          customerCity: city,
+          invoiceCount: 1,
+          totalLoanUsd: inv.totalUsd,
+        });
+      }
+    }
+
+    const itemKey = `${inv.productId}__${inv.unitPriceUsd}`;
+    const existingItem = itemGroups.get(itemKey);
+    if (existingItem) {
+      existingItem.quantitySold += inv.quantity;
+      existingItem.totalSalesUsd = Number(
+        (existingItem.totalSalesUsd + inv.totalUsd).toFixed(2)
+      );
+      if (isPaid) {
+        existingItem.cashPaidUsd = Number(
+          (existingItem.cashPaidUsd + inv.totalUsd).toFixed(2)
+        );
+      } else {
+        existingItem.loanUsd = Number(
+          (existingItem.loanUsd + inv.totalUsd).toFixed(2)
+        );
+      }
+    } else {
+      itemGroups.set(itemKey, {
+        productId: inv.productId,
+        productName: inv.productName,
+        unitPriceUsd: inv.unitPriceUsd,
+        quantitySold: inv.quantity,
+        totalSalesUsd: inv.totalUsd,
+        cashPaidUsd: isPaid ? inv.totalUsd : 0,
+        loanUsd: isPaid ? 0 : inv.totalUsd,
+      });
+    }
+  }
+
+  return {
+    period,
+    anchorDate,
+    startDate,
+    endDate,
+    totalInvoices: matchedInvoices.length,
+    totalUnitsSold,
+    totalSalesUsd,
+    cashPaidUsd,
+    cashInvoiceCount,
+    loanUsd,
+    loanInvoiceCount,
+    itemsBreakdown: Array.from(itemGroups.values()).sort(
+      (a, b) => b.totalSalesUsd - a.totalSalesUsd
+    ),
+    loanEntries,
+    loanCustomersSummary: Array.from(loanCustomerMap.values()).sort(
+      (a, b) => b.totalLoanUsd - a.totalLoanUsd
+    ),
+    invoices: matchedInvoices,
+  };
+}
+
+function diffIsoDays(fromIso: string, toIso: string): number {
+  const fromParts = fromIso.split('-').map(Number);
+  const toParts = toIso.split('-').map(Number);
+  if (
+    fromParts.length !== 3 ||
+    toParts.length !== 3 ||
+    fromParts.some((n) => !Number.isFinite(n)) ||
+    toParts.some((n) => !Number.isFinite(n))
+  ) {
+    return 0;
+  }
+  const fromMs = Date.UTC(fromParts[0], fromParts[1] - 1, fromParts[2]);
+  const toMs = Date.UTC(toParts[0], toParts[1] - 1, toParts[2]);
+  return Math.round((toMs - fromMs) / 86400000);
+}
+
+export function computeOutstandingLoansReport(
+  state: AccountingState,
+  referenceDateIso?: string
+): OutstandingLoansReport {
+  const referenceDate =
+    referenceDateIso && /^\d{4}-\d{2}-\d{2}$/.test(referenceDateIso)
+      ? referenceDateIso
+      : new Date().toISOString().slice(0, 10);
+
+  const unpaidInvoices = state.invoices.filter((inv) => inv.status === 'unpaid');
+  const customerMap = new Map(state.customers.map((c) => [c.id, c]));
+  const grouped = new Map<string, CustomerOutstandingLoans>();
+
+  let totalOutstandingUsd = 0;
+  let loanCount = 0;
+  let overdueCount = 0;
+  let dueWithin48HoursCount = 0;
+
+  for (const inv of unpaidInvoices) {
+    const daysUntilDue = diffIsoDays(referenceDate, inv.dueDate);
+    const isOverdue = daysUntilDue < 0;
+    const isDueWithin48Hours = daysUntilDue >= 0 && daysUntilDue <= 2;
+    const item: OutstandingLoanItem = {
+      invoiceId: inv.id,
+      invoiceNumber: inv.invoiceNumber,
+      productName: inv.productName,
+      quantity: inv.quantity,
+      unitPriceUsd: inv.unitPriceUsd,
+      amountUsd: inv.totalUsd,
+      loanDate: inv.date,
+      dueDate: inv.dueDate,
+      daysUntilDue,
+      isOverdue,
+      isDueWithin48Hours,
+    };
+
+    loanCount += 1;
+    if (isOverdue) overdueCount += 1;
+    if (isDueWithin48Hours) dueWithin48HoursCount += 1;
+    totalOutstandingUsd = Number((totalOutstandingUsd + inv.totalUsd).toFixed(2));
+
+    const existing = grouped.get(inv.customerId);
+    if (existing) {
+      existing.loans.push(item);
+      existing.totalUnpaidUsd = Number((existing.totalUnpaidUsd + inv.totalUsd).toFixed(2));
+      if (inv.dueDate < existing.earliestDueDate) {
+        existing.earliestDueDate = inv.dueDate;
+      }
+      if (isOverdue) {
+        existing.hasOverdue = true;
+      }
+      if (isDueWithin48Hours) {
+        existing.hasDueWithin48Hours = true;
+      }
+    } else {
+      const cust = customerMap.get(inv.customerId);
+      grouped.set(inv.customerId, {
+        customerId: inv.customerId,
+        customerName: cust?.name || inv.customerName,
+        customerPhone: cust?.phone || '—',
+        customerCity: cust?.city || '—',
+        totalUnpaidUsd: inv.totalUsd,
+        earliestDueDate: inv.dueDate,
+        hasOverdue: isOverdue,
+        hasDueWithin48Hours: isDueWithin48Hours,
+        loans: [item],
+      });
+    }
+  }
+
+  for (const cust of state.customers) {
+    if (cust.balanceUsd > 0 && !grouped.has(cust.id)) {
+      totalOutstandingUsd = Number((totalOutstandingUsd + cust.balanceUsd).toFixed(2));
+      grouped.set(cust.id, {
+        customerId: cust.id,
+        customerName: cust.name,
+        customerPhone: cust.phone,
+        customerCity: cust.city,
+        totalUnpaidUsd: cust.balanceUsd,
+        earliestDueDate: referenceDate,
+        hasOverdue: false,
+        hasDueWithin48Hours: false,
+        loans: [],
+      });
+    }
+  }
+
+  const customers = Array.from(grouped.values())
+    .map((c) => ({
+      ...c,
+      loans: [...c.loans].sort((a, b) => a.dueDate.localeCompare(b.dueDate)),
+    }))
+    .sort((a, b) => {
+      if (a.hasOverdue !== b.hasOverdue) return a.hasOverdue ? -1 : 1;
+      if (a.hasDueWithin48Hours !== b.hasDueWithin48Hours) {
+        return a.hasDueWithin48Hours ? -1 : 1;
+      }
+      return a.earliestDueDate.localeCompare(b.earliestDueDate);
+    });
+
+  return {
+    referenceDate,
+    totalOutstandingUsd,
+    customerCount: customers.length,
+    loanCount,
+    overdueCount,
+    dueWithin48HoursCount,
+    customers,
   };
 }

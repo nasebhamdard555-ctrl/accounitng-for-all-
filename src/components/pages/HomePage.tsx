@@ -1,4 +1,5 @@
 import {
+  AlertTriangle,
   ArrowRight,
   BarChart3,
   Building2,
@@ -15,15 +16,19 @@ import {
 } from 'lucide-react';
 import type { TranslationDict } from '../../i18n/translations';
 import type { AccountingState, AppLanguage, AppPage, CurrencyCode } from '../../types/accounting';
-import { computeAccountingSummary, formatAmount } from '../../utils/accountingEngine';
-import { PAGE_THEMES } from '../../utils/pageThemes';
+import {
+  computeAccountingSummary,
+  computeOutstandingLoansReport,
+  formatAmount,
+} from '../../utils/accountingEngine';
+import { useThemeContext } from '../../utils/ThemeContext';
 
 interface HomePageProps {
   state: AccountingState;
   language: AppLanguage;
   onChangeLanguage: (lang: AppLanguage) => void;
   onChangeCurrency: (curr: CurrencyCode) => void;
-  onNavigate: (page: AppPage) => void;
+  onNavigate: (page: AppPage, customerTarget?: 'invoice' | 'payment' | 'add_customer') => void;
   conflictCount: number;
   t: TranslationDict;
 }
@@ -37,15 +42,21 @@ export function HomePage({
   conflictCount,
   t,
 }: HomePageProps) {
-  const theme = PAGE_THEMES.home;
-  const custTheme = PAGE_THEMES.customers;
-  const vendTheme = PAGE_THEMES.vendors;
-  const invTheme = PAGE_THEMES.inventory;
-  const bankTheme = PAGE_THEMES.banking;
-  const posTheme = PAGE_THEMES.pos_sync;
-  const repTheme = PAGE_THEMES.reports;
+  const { preset } = useThemeContext();
+  const pages = preset.pages;
+  const theme = pages.home;
+  const custTheme = pages.customers;
+  const vendTheme = pages.vendors;
+  const invTheme = pages.inventory;
+  const bankTheme = pages.banking;
+  const posTheme = pages.pos_sync;
+  const repTheme = pages.reports;
 
   const summary = computeAccountingSummary(state);
+  const outstandingLoans = computeOutstandingLoansReport(state);
+  const unpaidInvoicesCount = state.invoices.filter((inv) => inv.status === 'unpaid').length;
+  const unpaidBillsCount = state.bills.filter((b) => b.status === 'unpaid').length;
+  const lowStockCount = state.products.filter((p) => p.stockQty <= 2).length;
 
   return (
     <div className={`flex-1 ${theme.canvasBg} overflow-y-auto`}>
@@ -120,25 +131,61 @@ export function HomePage({
       <div className="max-w-6xl mx-auto p-5 sm:p-8 space-y-6">
         {/* 4-column summary KPI strip */}
         <section aria-label="Business numbers" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white border border-slate-200 rounded-lg p-4">
+          <button
+            type="button"
+            onClick={() => onNavigate('banking')}
+            className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-xs rounded-lg p-4 text-start transition-all"
+          >
             <p className="text-xs font-medium text-slate-500">{t.home.cashOnHand}</p>
             <p className={`font-display text-xl font-bold ${bankTheme.accentText} tabular-nums mt-1`}>
               {formatAmount(summary.totalCashUsd, state.currency)}
             </p>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-slate-500">{t.home.moneyOwedToYou}</p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('reports')}
+            className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-xs rounded-lg p-4 text-start transition-all"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-medium text-slate-500">{t.home.moneyOwedToYou}</p>
+              {outstandingLoans.dueWithin48HoursCount > 0 && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-amber-300 bg-amber-50 text-amber-900 text-[10px] font-bold tabular-nums">
+                  <AlertTriangle size={10} aria-hidden="true" />
+                  <span>
+                    {outstandingLoans.dueWithin48HoursCount} {t.home.dueSoonAlert}
+                  </span>
+                </span>
+              )}
+            </div>
             <p className={`font-display text-xl font-bold ${custTheme.accentText} tabular-nums mt-1`}>
               {formatAmount(summary.totalReceivablesUsd, state.currency)}
             </p>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-slate-500">{t.home.billsYouOwe}</p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('vendors')}
+            className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-xs rounded-lg p-4 text-start transition-all"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-medium text-slate-500">{t.home.billsYouOwe}</p>
+              {unpaidBillsCount > 0 && (
+                <span className={`font-mono text-[11px] font-semibold ${vendTheme.accentText} tabular-nums`}>
+                  ({unpaidBillsCount} {t.home.unpaidBillsAlert})
+                </span>
+              )}
+            </div>
             <p className={`font-display text-xl font-bold ${vendTheme.accentText} tabular-nums mt-1`}>
               {formatAmount(summary.totalPayablesUsd, state.currency)}
             </p>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-lg p-4">
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('reports')}
+            className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-xs rounded-lg p-4 text-start transition-all"
+          >
             <p className="text-xs font-medium text-slate-500">{t.home.netProfit}</p>
             <p
               className={`font-display text-xl font-bold tabular-nums mt-1 ${
@@ -147,6 +194,114 @@ export function HomePage({
             >
               {formatAmount(summary.netProfitUsd, state.currency)}
             </p>
+          </button>
+        </section>
+
+        {/* Quick Actions Strip */}
+        <section
+          aria-label={t.home.quickActionsTitle}
+          className={`bg-white border ${theme.cardBorder} rounded-lg p-5`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-4">
+            <h2 className={`font-display text-base font-bold ${theme.headingText}`}>
+              {t.home.quickActionsTitle}
+            </h2>
+            <p className="text-xs text-slate-600">{t.home.quickActionsSubtitle}</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* Primary Action: Record Sale */}
+            <button
+              type="button"
+              onClick={() => onNavigate('customers', 'invoice')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md ${custTheme.accentBg} ${custTheme.accentHover} text-white text-start transition-colors`}
+            >
+              <FilePlus2 size={20} className="shrink-0" aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold">{t.home.qaRecordSale}</div>
+                <div className="text-xs text-white/85 truncate">{t.home.qaRecordSaleDesc}</div>
+              </div>
+              <ArrowRight size={15} className="shrink-0 opacity-85 rtl:rotate-180" aria-hidden="true" />
+            </button>
+
+            {/* Log Payment */}
+            <button
+              type="button"
+              onClick={() => onNavigate('customers', 'payment')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md border ${custTheme.cardBorder} bg-white hover:brightness-[0.97] text-start transition-all`}
+            >
+              <Wallet size={20} className={`${custTheme.accentText} shrink-0`} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-slate-900 flex items-center justify-between gap-2">
+                  <span>{t.home.qaLogPayment}</span>
+                  {unpaidInvoicesCount > 0 && (
+                    <span className={`font-mono text-xs font-semibold ${vendTheme.accentText} tabular-nums`}>
+                      ({unpaidInvoicesCount} {t.home.qaUnpaidCount})
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-slate-600 truncate">{t.home.qaLogPaymentDesc}</div>
+              </div>
+            </button>
+
+            {/* Add Customer */}
+            <button
+              type="button"
+              onClick={() => onNavigate('customers', 'add_customer')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md border ${custTheme.cardBorder} bg-white hover:brightness-[0.97] text-start transition-all`}
+            >
+              <UserPlus size={20} className={`${custTheme.accentText} shrink-0`} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-slate-900">{t.home.qaAddCustomer}</div>
+                <div className="text-xs text-slate-600 truncate">{t.home.qaAddCustomerDesc}</div>
+              </div>
+            </button>
+
+            {/* Enter Supplier Bill */}
+            <button
+              type="button"
+              onClick={() => onNavigate('vendors')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md border ${vendTheme.cardBorder} bg-white hover:brightness-[0.97] text-start transition-all`}
+            >
+              <FileText size={20} className={`${vendTheme.accentText} shrink-0`} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-slate-900 flex items-center justify-between gap-2">
+                  <span>{t.home.qaEnterBill}</span>
+                  {unpaidBillsCount > 0 && (
+                    <span className={`font-mono text-xs font-semibold ${vendTheme.accentText} tabular-nums`}>
+                      ({unpaidBillsCount})
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-slate-600 truncate">{t.home.qaEnterBillDesc}</div>
+              </div>
+            </button>
+
+            {/* Log Expense / Deposit */}
+            <button
+              type="button"
+              onClick={() => onNavigate('banking')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md border ${bankTheme.cardBorder} bg-white hover:brightness-[0.97] text-start transition-all`}
+            >
+              <Building2 size={20} className={`${bankTheme.accentText} shrink-0`} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-slate-900">{t.home.qaRecordExpense}</div>
+                <div className="text-xs text-slate-600 truncate">{t.home.qaRecordExpenseDesc}</div>
+              </div>
+            </button>
+
+            {/* View Daily & Loan Reports */}
+            <button
+              type="button"
+              onClick={() => onNavigate('reports')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md border ${repTheme.cardBorder} bg-white hover:brightness-[0.97] text-start transition-all`}
+            >
+              <BarChart3 size={20} className={`${repTheme.accentText} shrink-0`} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-slate-900">{t.home.qaViewReports}</div>
+                <div className="text-xs text-slate-600 truncate">{t.home.qaViewReportsDesc}</div>
+              </div>
+            </button>
           </div>
         </section>
 
@@ -164,8 +319,8 @@ export function HomePage({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
               <button
                 type="button"
-                onClick={() => onNavigate('customers')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:bg-[#E2EFE8] text-start transition-colors`}
+                onClick={() => onNavigate('customers', 'add_customer')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <UserPlus size={20} className={`${custTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div>
@@ -176,8 +331,8 @@ export function HomePage({
 
               <button
                 type="button"
-                onClick={() => onNavigate('customers')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:bg-[#E2EFE8] text-start transition-colors`}
+                onClick={() => onNavigate('customers', 'invoice')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <FilePlus2 size={20} className={`${custTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div className="flex-1">
@@ -191,8 +346,8 @@ export function HomePage({
 
               <button
                 type="button"
-                onClick={() => onNavigate('customers')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:bg-[#E2EFE8] text-start transition-colors`}
+                onClick={() => onNavigate('customers', 'payment')}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <Wallet size={20} className={`${custTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div>
@@ -212,7 +367,7 @@ export function HomePage({
               <button
                 type="button"
                 onClick={() => onNavigate('vendors')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:bg-[#EDE3D5] text-start transition-colors`}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <Users size={20} className={`${vendTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div>
@@ -224,7 +379,7 @@ export function HomePage({
               <button
                 type="button"
                 onClick={() => onNavigate('vendors')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:bg-[#EDE3D5] text-start transition-colors`}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <FileText size={20} className={`${vendTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div className="flex-1">
@@ -239,7 +394,7 @@ export function HomePage({
               <button
                 type="button"
                 onClick={() => onNavigate('vendors')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:bg-[#EDE3D5] text-start transition-colors`}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <Receipt size={20} className={`${vendTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div>
@@ -259,11 +414,18 @@ export function HomePage({
               <button
                 type="button"
                 onClick={() => onNavigate('inventory')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${invTheme.cardBorder} ${invTheme.subtleCardBg} hover:bg-[#E4E7F2] text-start transition-colors`}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${invTheme.cardBorder} ${invTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <Package size={20} className={`${invTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div>
-                  <div className="text-sm font-semibold text-slate-900">{t.home.stepInventory}</div>
+                  <div className="text-sm font-semibold text-slate-900 flex items-center gap-1.5 flex-wrap">
+                    <span>{t.home.stepInventory}</span>
+                    {lowStockCount > 0 && (
+                      <span className="font-mono text-[11px] font-semibold text-[#8C3B3B] tabular-nums">
+                        ({lowStockCount} {t.home.lowStockAlert})
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs text-slate-600 mt-0.5">{t.home.stepInventoryDesc}</div>
                 </div>
               </button>
@@ -271,7 +433,7 @@ export function HomePage({
               <button
                 type="button"
                 onClick={() => onNavigate('banking')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${bankTheme.cardBorder} ${bankTheme.subtleCardBg} hover:bg-[#E0ECF2] text-start transition-colors`}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${bankTheme.cardBorder} ${bankTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <Building2 size={20} className={`${bankTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div>
@@ -283,7 +445,7 @@ export function HomePage({
               <button
                 type="button"
                 onClick={() => onNavigate('pos_sync')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${posTheme.cardBorder} ${posTheme.subtleCardBg} hover:bg-[#EFE2E2] text-start transition-colors`}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${posTheme.cardBorder} ${posTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <RefreshCw size={20} className={`${posTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div>
@@ -297,7 +459,7 @@ export function HomePage({
               <button
                 type="button"
                 onClick={() => onNavigate('reports')}
-                className={`flex items-start gap-3 p-3.5 rounded-md border ${repTheme.cardBorder} ${repTheme.subtleCardBg} hover:bg-[#E8E2F0] text-start transition-colors`}
+                className={`flex items-start gap-3 p-3.5 rounded-md border ${repTheme.cardBorder} ${repTheme.subtleCardBg} hover:brightness-[0.97] text-start transition-all`}
               >
                 <BarChart3 size={20} className={`${repTheme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
                 <div>

@@ -220,32 +220,35 @@ export const GUIDE_TOPICS: GuideTopic[] = [
   {
     id: 'reports',
     targetPage: 'reports',
-    keywords: ['report', 'profit', 'loss', 'csv', 'print', 'راپور', 'ګټه', 'گزارش', 'مفاد', 'چاپ'],
+    keywords: ['report', 'daily', 'weekly', 'monthly', 'loan', 'cash', 'profit', 'loss', 'csv', 'print', 'راپور', 'ورځنی', 'اونیز', 'میاشتنی', 'پور', 'ګټه', 'گزارش', 'روزانه', 'هفته‌وار', 'ماهانه', 'قرض', 'مفاد', 'چاپ'],
     label: {
-      en: 'How to Check Profit & Download Reports',
-      ps: 'څنګه ګټه وګورو او راپور چاپ کړو؟',
-      fa: 'چطور مفاد را ببینیم و گزارش چاپ کنیم؟',
+      en: 'How to Run End-of-Day, Week & Month Reports (Cash vs Loans)',
+      ps: 'څنګه د ورځې، اونۍ او میاشتې راپور (نغد او پور) وګورو؟',
+      fa: 'چطور گزارش پایان روز، هفته و ماه (نقد و قرض) را بگیریم؟',
     },
     summary: {
-      en: 'See how much profit you earned, who still owes you, what bills you owe, and export a CSV sheet anytime.',
-      ps: 'خپله خالصه ګټه، پاتې طلبات، پورونه او د ګودام ارزښت دلته وګورئ او CSV ډاونلوډ کړئ.',
-      fa: 'مفاد خالص، طلبات مشتریان، بدهی‌ها و ارزش گدام را ببینید و فایل CSV دریافت کنید.',
+      en: 'See how many items were sold at each price, how much was paid in cash, and how much is out on loan with each customer for any day, week, or month.',
+      ps: 'د هرې ورځې، اونۍ یا میاشتې لپاره وګورئ څومره توکي په کومه بیه وپلورل شول، څومره نغد وو او څومره پور له چا سره دی.',
+      fa: 'برای هر روز، هفته یا ماه ببینید چند عدد جنس به چه قیمتی فروخته شد، چقدر نقد بود و چقدر قرض نزد کدام مشتری است.',
     },
     steps: {
       en: [
         'Open "Business Reports" from the left menu.',
-        'Review Profit & Loss, Customers Who Owe You, and Inventory Value.',
-        'Click "Download Summary (CSV)" to save a file or "Print Report".',
+        'Click "End of Day", "End of Week", or "End of Month" and pick the date you want to check.',
+        'Check "How Many Sold & At What Price" for unit quantities and prices, and "Loans Given & With Whom" for customer names and phones.',
+        'Click "Download Period Report (CSV)" or "Print Report" to save or print the full closing sheet.',
       ],
       ps: [
-        'له منو څخه "د سوداګرۍ راپورونه" خلاص کړئ.',
-        'د ګټې، طلباتو او ګودام ارزښت وګورئ.',
+        'له کیڼ منو څخه "د سوداګرۍ راپورونه" خلاص کړئ.',
+        '"د ورځې پای"، "د اونۍ پای"، یا "د میاشتې پای" وټاکئ او نېټه انتخاب کړئ.',
+        'لاندې د پلورل شویو توکو تعداد، بیې، نغدې پیسې او د پور اخیستونکو نومونه وګورئ.',
         'د چاپ یا CSV ډاونلوډ تڼۍ کلیک کړئ.',
       ],
       fa: [
-        'بخش «گزارش‌های مالی» را باز کنید.',
-        'مفاد، طلبات مشتریان و ارزش اجناس را بررسی کنید.',
-        'برای ذخیره یا چاپ روی «دانلود خلاصه» یا «چاپ گزارش» کلیک کنید.',
+        'از منوی کناری بخش «گزارش‌های مالی» را باز کنید.',
+        'دکمه «پایان روز»، «پایان هفته» یا «پایان ماه» را بزنید و تاریخ دلخواه را انتخاب کنید.',
+        'جدول تعداد و قیمت فروش و جدول «قرض‌ها و نزد چه کسی است» را بررسی کنید.',
+        'برای ذخیره یا چاپ کامل، دکمه «دانلود گزارش دوره (CSV)» یا «چاپ گزارش» را بزنید.',
       ],
     },
   },
@@ -281,6 +284,38 @@ export const GUIDE_TOPICS: GuideTopic[] = [
       ],
     },
   },
+  {
+    id: 'theme_settings',
+    targetPage: 'settings',
+    keywords: ['theme', 'color', 'settings', 'appearance', 'backup', 'رنګ', 'تنظیمات', 'رنگ', 'تم', 'ظاهر'],
+    label: {
+      en: 'How to Change Color Themes & Settings',
+      ps: 'څنګه د کاریال رنګ او تنظیمات بدل کړو؟',
+      fa: 'چطور تم رنگی و تنظیمات برنامه را تغییر دهیم؟',
+    },
+    summary: {
+      en: 'Pick a subtle executive color theme for the interface while keeping each accounting section slightly distinct in color.',
+      ps: 'د کاریال لپاره یو آرام مسلکي رنګ وټاکئ ترڅو هره پاڼه خپل نرم توپیر وساتي.',
+      fa: 'یک تم رنگی آرام و اداری برای ظاهر برنامه انتخاب کنید در حالی که هر بخش رنگ متمایز خود را حفظ می‌کند.',
+    },
+    steps: {
+      en: [
+        'Click "Settings" at the bottom of the left menu.',
+        'Click any theme card (Classic Ledger, Warm Parchment, Crisp Pewter, or Botanical Stone) to preview and apply it immediately.',
+        'You can also switch Language, Currency, or export/import a JSON Backup from Settings.',
+      ],
+      ps: [
+        'د کیڼ اړخ منو په پای کې "تنظیمات" کلیک کړئ.',
+        'هر رنګین کارت (Classic Ledger، Warm Parchment، Crisp Pewter یا Botanical Stone) کلیک کړئ ترڅو سمدستي تطبیق شي.',
+        'همدلته کولی شئ ژبه، اسعار او JSON بیک اپ هم تنظیم کړئ.',
+      ],
+      fa: [
+        'در پایین منوی سمت چپ روی «تنظیمات» کلیک کنید.',
+        'روی هر کارت تم رنگی (Classic Ledger، Warm Parchment، Crisp Pewter یا Botanical Stone) کلیک کنید تا بلافاصله اعمال شود.',
+        'از همین صفحه می‌توانید زبان، واحد پول و پشتیبان‌گیری JSON را نیز مدیریت کنید.',
+      ],
+    },
+  },
 ];
 
 const PAGE_TO_TOPIC_ID: Record<AppPage, string> = {
@@ -291,6 +326,7 @@ const PAGE_TO_TOPIC_ID: Record<AppPage, string> = {
   banking: 'banking_cash',
   pos_sync: 'pos_sync',
   reports: 'reports',
+  settings: 'theme_settings',
 };
 
 export function getPageQuickGuide(page: AppPage, lang: AppLanguage): GuideTopic {

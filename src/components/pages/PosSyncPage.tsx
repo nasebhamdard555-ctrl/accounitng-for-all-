@@ -9,18 +9,19 @@ import {
 } from 'lucide-react';
 import type { TranslationDict } from '../../i18n/translations';
 import type { CurrencyCode } from '../../types/accounting';
-import type { InventoryDevice, QuarantinedConflict } from '../../types/pos';
+import type { InventoryDevice, QuarantinedConflict, ResolutionLogEntry } from '../../types/pos';
 import { formatAmount } from '../../utils/accountingEngine';
 import {
   formatErrorTypeLabel,
   sanitizeImeiInput,
   validateImeiForReassignment,
 } from '../../utils/conflictResolver';
-import { PAGE_THEMES } from '../../utils/pageThemes';
+import { usePageTheme } from '../../utils/ThemeContext';
 
 interface PosSyncPageProps {
   conflicts: QuarantinedConflict[];
   inventory: InventoryDevice[];
+  logs?: ResolutionLogEntry[];
   currency: CurrencyCode;
   onReassignImei: (conflictKey: string, newImei: string) => { ok: boolean; error?: string };
   onOverrideConflict: (conflictKey: string, note: string) => { ok: boolean; error?: string };
@@ -33,6 +34,7 @@ interface PosSyncPageProps {
 export function PosSyncPage({
   conflicts,
   inventory,
+  logs = [],
   currency,
   onReassignImei,
   onOverrideConflict,
@@ -41,7 +43,7 @@ export function PosSyncPage({
   onRestoreDemo,
   t,
 }: PosSyncPageProps) {
-  const theme = PAGE_THEMES.pos_sync;
+  const theme = usePageTheme('pos_sync');
   const [selectedKey, setSelectedKey] = useState<string | null>(conflicts[0]?.key ?? null);
   const [choice, setChoice] = useState<'pick' | 'approve' | 'cancel'>('pick');
   const [newImei, setNewImei] = useState('');
@@ -138,7 +140,7 @@ export function PosSyncPage({
             <button
               type="button"
               onClick={onRestoreDemo}
-              className="mt-5 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#2B4C7E] hover:bg-[#223D66] rounded-md transition-colors"
+              className={`mt-5 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white ${theme.accentBg} ${theme.accentHover} rounded-md transition-colors`}
             >
               <RefreshCw size={14} aria-hidden="true" />
               <span>{t.common.restoreDemo}</span>
@@ -351,6 +353,49 @@ export function PosSyncPage({
             )}
           </div>
         )}
+
+        {/* Recent POS Sync Audit Log */}
+        <section className={`bg-white border ${theme.cardBorder} rounded-lg overflow-hidden`}>
+          <div className={`px-5 py-3.5 border-b ${theme.cardBorder} ${theme.subtleCardBg}`}>
+            <h2 className={`font-display text-sm font-bold ${theme.headingText}`}>
+              {t.posSync.resolutionLogTitle} ({logs.length})
+            </h2>
+          </div>
+          {logs.length === 0 ? (
+            <p className="px-5 py-4 text-xs text-slate-500">{t.posSync.noLogs}</p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {logs.slice(0, 10).map((log) => {
+                const actionLabel =
+                  log.action === 'IMEI_REASSIGNED'
+                    ? t.posSync.actionReassigned
+                    : log.action === 'MANAGER_OVERRIDE'
+                      ? t.posSync.actionOverride
+                      : t.posSync.actionVoided;
+                return (
+                  <div key={log.id} className="px-5 py-3 flex flex-wrap items-center justify-between gap-2 text-xs hover:bg-slate-50/70">
+                    <div className="flex flex-wrap items-center gap-2 min-w-0">
+                      <span className="font-mono font-semibold text-slate-900">
+                        #{log.receipt_number}
+                      </span>
+                      <span
+                        className={`px-1.5 py-0.5 rounded border text-[11px] font-semibold ${theme.cardBorder} ${theme.subtleCardBg} ${theme.headingText}`}
+                      >
+                        {actionLabel}
+                      </span>
+                      <span className="text-slate-700 truncate">{log.note}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-500 font-mono shrink-0">
+                      <span>{log.resolvedBy}</span>
+                      <span>·</span>
+                      <span>{log.resolvedAt.slice(0, 10)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import {
   GUIDE_TOPICS,
   type GuideTopic,
 } from '../utils/guideBot';
+import { usePageTheme } from '../utils/ThemeContext';
 
 interface GuideBotDrawerProps {
   open: boolean;
@@ -26,6 +27,7 @@ export function GuideBotDrawer({
   onNavigate,
   t,
 }: GuideBotDrawerProps) {
+  const theme = usePageTheme(currentPage);
   const [question, setQuestion] = useState('');
   const [activeTopic, setActiveTopic] = useState<GuideTopic>(() =>
     getPageQuickGuide(currentPage, language)
@@ -48,19 +50,19 @@ export function GuideBotDrawer({
       aria-label={t.guide.title}
       className="fixed inset-y-0 end-0 z-50 w-full max-w-md bg-white border-s border-slate-300 shadow-xl flex flex-col"
     >
-      <div className="bg-[#2B4C7E] text-white px-5 py-4 flex items-start justify-between gap-4 shrink-0">
+      <div className={`${theme.accentBg} text-white px-5 py-4 flex items-start justify-between gap-4 shrink-0`}>
         <div className="flex items-start gap-3">
           <HelpCircle size={22} className="shrink-0 mt-0.5" aria-hidden="true" />
           <div>
             <h2 className="font-display text-base font-semibold">{t.guide.title}</h2>
-            <p className="text-xs text-[#DCE6F5] mt-0.5">{t.guide.subtitle}</p>
+            <p className="text-xs text-white/85 mt-0.5">{t.guide.subtitle}</p>
           </div>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label={t.guide.closeBtn}
-          className="p-1.5 rounded hover:bg-[#223D66] text-white transition-colors shrink-0"
+          className={`p-1.5 rounded ${theme.accentHover} text-white transition-colors shrink-0`}
         >
           <X size={18} aria-hidden="true" />
         </button>
@@ -77,11 +79,11 @@ export function GuideBotDrawer({
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder={t.guide.askPlaceholder}
-            className="flex-1 bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2B4C7E]"
+            className={`flex-1 bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${theme.accentRing}`}
           />
           <button
             type="submit"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white bg-[#2B4C7E] hover:bg-[#223D66] rounded-md transition-colors whitespace-nowrap shrink-0"
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white ${theme.accentBg} ${theme.accentHover} rounded-md transition-colors whitespace-nowrap shrink-0`}
           >
             <Send size={14} aria-hidden="true" />
             <span>{t.guide.askButton}</span>
@@ -90,8 +92,8 @@ export function GuideBotDrawer({
       </form>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-6">
-        <div className="bg-[#EFF4FA] border border-[#CBD7E6] rounded-lg p-4 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#1E3A5F]">
+        <div className={`${theme.subtleCardBg} border ${theme.cardBorder} rounded-lg p-4 space-y-3`}>
+          <div className={`flex items-center gap-2 text-xs font-semibold ${theme.headingText}`}>
             <BookOpen size={14} aria-hidden="true" />
             <span>{t.guide.currentPageTipLabel}</span>
           </div>
@@ -103,14 +105,14 @@ export function GuideBotDrawer({
             {activeTopic.summary[language]}
           </p>
 
-          <div className="pt-2 border-t border-[#CBD7E6]">
+          <div className={`pt-2 border-t ${theme.cardBorder}`}>
             <p className="text-xs font-semibold text-slate-800 mb-2">
               {t.guide.stepsLabel}
             </p>
             <ol className="space-y-2">
               {activeTopic.steps[language].map((step, idx) => (
                 <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-800">
-                  <span className="w-5 h-5 rounded bg-[#2B4C7E] text-white text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5 tabular-nums">
+                  <span className={`w-5 h-5 rounded ${theme.accentBg} text-white text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5 tabular-nums`}>
                     {idx + 1}
                   </span>
                   <span className="leading-snug">{step}</span>
@@ -127,7 +129,7 @@ export function GuideBotDrawer({
                   onNavigate(activeTopic.targetPage);
                   onClose();
                 }}
-                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-white bg-[#2B4C7E] hover:bg-[#223D66] rounded-md transition-colors"
+                className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-white ${theme.accentBg} ${theme.accentHover} rounded-md transition-colors`}
               >
                 <span>
                   {t.guide.goToPageBtn}: {t.nav[activeTopic.targetPage]}
@@ -152,7 +154,7 @@ export function GuideBotDrawer({
                   onClick={() => setActiveTopic(topic)}
                   className={`w-full text-start px-3.5 py-2.5 rounded-md border text-sm transition-colors ${
                     selected
-                      ? 'bg-[#E8EEF7] border-[#B9CAE0] text-[#1E3A5F] font-semibold'
+                      ? `${theme.navActiveBg} ${theme.navActiveBorder} ${theme.navActiveText} font-semibold`
                       : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
