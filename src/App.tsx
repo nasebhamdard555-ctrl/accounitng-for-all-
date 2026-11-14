@@ -42,6 +42,8 @@ import type {
   AppPage,
   AppThemeId,
   CurrencyCode,
+  ExpenseCategory,
+  ProductItem,
 } from './types/accounting';
 import type { QuarantinedConflict } from './types/pos';
 import {
@@ -54,6 +56,8 @@ import {
   payVendorBill,
   receiveInvoicePayment,
   recordBankEntry,
+  returnSalesInvoice,
+  returnVendorBill,
 } from './utils/accountingEngine';
 import {
   overrideConflict,
@@ -288,8 +292,18 @@ export default function App() {
   );
 
   const handleReceivePayment = useCallback(
-    (invoiceId: string, accountId: string) => {
-      const res = receiveInvoicePayment(accounting, invoiceId, accountId);
+    (invoiceId: string, accountId: string, customAmountUsd?: number) => {
+      const res = receiveInvoicePayment(accounting, invoiceId, accountId, customAmountUsd);
+      if (!res.ok) return { ok: false, error: res.error };
+      setAccounting(res.state);
+      return { ok: true };
+    },
+    [accounting]
+  );
+
+  const handleReturnInvoice = useCallback(
+    (invoiceId: string, accountId?: string) => {
+      const res = returnSalesInvoice(accounting, invoiceId, accountId);
       if (!res.ok) return { ok: false, error: res.error };
       setAccounting(res.state);
       return { ok: true };
@@ -318,8 +332,18 @@ export default function App() {
   );
 
   const handlePayBill = useCallback(
-    (billId: string, accountId: string) => {
-      const res = payVendorBill(accounting, billId, accountId);
+    (billId: string, accountId: string, customAmountUsd?: number) => {
+      const res = payVendorBill(accounting, billId, accountId, customAmountUsd);
+      if (!res.ok) return { ok: false, error: res.error };
+      setAccounting(res.state);
+      return { ok: true };
+    },
+    [accounting]
+  );
+
+  const handleReturnBill = useCallback(
+    (billId: string, accountId?: string) => {
+      const res = returnVendorBill(accounting, billId, accountId);
       if (!res.ok) return { ok: false, error: res.error };
       setAccounting(res.state);
       return { ok: true };
@@ -341,10 +365,12 @@ export default function App() {
     (input: {
       name: string;
       sku: string;
+      brand?: string;
       category: string;
       costUsd: number;
       priceUsd: number;
       stockQty: number;
+      reorderLevel?: number;
     }) => {
       const res = addProductItem(accounting, input);
       if (!res.ok) return { ok: false, error: res.error };
@@ -358,12 +384,53 @@ export default function App() {
     setAccounting((prev) => adjustProductStock(prev, productId, delta));
   }, []);
 
+  const handleAddIncomingImei = useCallback(
+    (input: {
+      product: ProductItem;
+      imei: string;
+      supplierName: string;
+      purchaseInvoiceRef: string;
+    }) => {
+      const cleanImei = input.imei.trim();
+      if (cleanImei.length < 8) {
+        return { ok: false, error: 'Enter a valid IMEI number (at least 8 characters).' };
+      }
+      if (posState.inventory.some((d) => d.imei.toLowerCase() === cleanImei.toLowerCase())) {
+        return { ok: false, error: `IMEI ${cleanImei} is already registered in inventory.` };
+      }
+      const today = new Date().toISOString().slice(0, 10);
+      setPosState((prev) => ({
+        ...prev,
+        inventory: [
+          {
+            sku: input.product.sku,
+            product_name: input.product.name,
+            imei: cleanImei,
+            storage: 'Standard',
+            color: 'Standard',
+            status: 'in_stock',
+            unit_price: input.product.priceUsd,
+            costUsd: input.product.costUsd,
+            supplierName: input.supplierName.trim() || 'Supplier',
+            purchaseInvoiceRef: input.purchaseInvoiceRef.trim() || 'BILL',
+            purchaseDate: today,
+          },
+          ...prev.inventory,
+        ],
+      }));
+      setAccounting((prev) => adjustProductStock(prev, input.product.id, 1));
+      return { ok: true };
+    },
+    [posState.inventory]
+  );
+
   const handleRecordBankEntry = useCallback(
     (input: {
       accountId: string;
       type: 'deposit' | 'expense';
       description: string;
       amountUsd: number;
+      expenseCategory?: ExpenseCategory;
     }) => {
       const res = recordBankEntry(accounting, input);
       if (!res.ok) return { ok: false, error: res.error };
@@ -832,6 +899,7 @@ export default function App() {
             state={accounting}
             onCreateInvoice={handleCreateInvoice}
             onReceivePayment={handleReceivePayment}
+            onReturnInvoice={handleReturnInvoice}
             onAddCustomer={handleAddCustomer}
             focusTarget={customerFocusTarget}
             onClearFocusTarget={() => setCustomerFocusTarget(null)}
@@ -844,6 +912,7 @@ export default function App() {
             state={accounting}
             onCreateBill={handleCreateBill}
             onPayBill={handlePayBill}
+            onReturnBill={handleReturnBill}
             onAddVendor={handleAddVendor}
             t={t}
           />
@@ -852,8 +921,10 @@ export default function App() {
         {activePage === 'inventory' && (
           <InventoryPage
             state={accounting}
+            inventoryDevices={posState.inventory}
             onAddProduct={handleAddProduct}
             onAdjustStock={handleAdjustStock}
+            onAddImei={handleAddIncomingImei}
             t={t}
           />
         )}

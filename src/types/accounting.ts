@@ -18,6 +18,13 @@ export type AppPage =
   | 'reports'
   | 'settings';
 
+export type ExpenseCategory =
+  | 'shop_rent'
+  | 'employee_salary'
+  | 'utilities_internet'
+  | 'transport'
+  | 'other';
+
 export interface Customer {
   id: string;
   name: string;
@@ -40,6 +47,10 @@ export interface SalesInvoice {
   dueDate: string;
   status: 'unpaid' | 'paid';
   paidToAccountId?: string;
+  paidAmountUsd?: number;
+  returnedUsd?: number;
+  imei?: string;
+  returnNote?: string;
 }
 
 export interface Vendor {
@@ -61,6 +72,9 @@ export interface VendorBill {
   dueDate: string;
   status: 'unpaid' | 'paid';
   paidFromAccountId?: string;
+  paidAmountUsd?: number;
+  returnedUsd?: number;
+  returnNote?: string;
 }
 
 export interface ProductItem {
@@ -71,6 +85,8 @@ export interface ProductItem {
   costUsd: number;
   priceUsd: number;
   stockQty: number;
+  brand?: string;
+  reorderLevel?: number;
 }
 
 export interface BankAccount {
@@ -88,6 +104,9 @@ export interface BankTransaction {
   type: 'deposit' | 'expense' | 'payment_received' | 'bill_paid';
   description: string;
   amountUsd: number;
+  expenseCategory?: ExpenseCategory;
+  relatedPartyId?: string;
+  relatedDocNumber?: string;
 }
 
 export interface AccountingState {
@@ -189,4 +208,75 @@ export interface OutstandingLoansReport {
   overdueCount: number;
   dueWithin48HoursCount: number;
   customers: CustomerOutstandingLoans[];
+}
+
+export interface DailyBusinessPulse {
+  date: string;
+  todaySalesUsd: number;
+  todayCashCollectedUsd: number;
+  todayLoansGivenUsd: number;
+  todayUnitsSold: number;
+  todayGrossProfitUsd: number;
+  todayGrossMarginPct: number;
+  totalMarketLoansUsd: number;
+  marketLoanCustomerCount: number;
+  overdueLoansCount: number;
+  due48hLoansCount: number;
+  totalOwedToSuppliersUsd: number;
+  unpaidBillsCount: number;
+  todayExpensesUsd: number;
+  totalExpensesUsd: number;
+  expensesByCategory: Record<ExpenseCategory, number>;
+  todayNetProfitUsd: number;
+}
+
+export interface PartyLedgerEntry {
+  id: string;
+  date: string;
+  refNumber: string;
+  type: 'invoice' | 'payment' | 'return' | 'bill' | 'bill_payment' | 'bill_return';
+  description: string;
+  debitUsd: number;
+  creditUsd: number;
+  runningBalanceUsd: number;
+}
+
+export interface PartyLedgerStatement {
+  kind: 'customer' | 'vendor';
+  partyId: string;
+  partyName: string;
+  partyPhone: string;
+  partyCity: string;
+  totalDebitUsd: number;
+  totalCreditUsd: number;
+  closingBalanceUsd: number;
+  entries: PartyLedgerEntry[];
+}
+
+export interface ProfitAndLossStatement {
+  grossSalesUsd: number;
+  salesReturnsUsd: number;
+  netSalesUsd: number;
+  costOfGoodsSoldUsd: number;
+  grossProfitUsd: number;
+  grossMarginPct: number;
+  totalPurchasesUsd: number;
+  closingInventoryCostUsd: number;
+  closingInventoryRetailUsd: number;
+  expensesBreakdown: Record<ExpenseCategory, number>;
+  totalShopExpensesUsd: number;
+  netProfitUsd: number;
+  netMarginPct: number;
+}
+
+export interface ProductRegisterEntry {
+  id: string;
+  date: string;
+  refNumber: string;
+  kind: 'sale' | 'return';
+  partyName: string;
+  quantity: number;
+  unitPriceUsd: number;
+  totalUsd: number;
+  status: 'paid' | 'unpaid' | 'returned';
 }

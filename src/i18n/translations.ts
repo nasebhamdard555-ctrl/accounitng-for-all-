@@ -81,6 +81,26 @@ export interface TranslationDict {
     dueSoonAlert: string;
     lowStockAlert: string;
     unpaidBillsAlert: string;
+    dailyPulseTitle: string;
+    dailyPulseSubtitle: string;
+    marketLoansCard: string;
+    marketLoansHolders: string;
+    collectLoanBtn: string;
+    supplierDebtCard: string;
+    paySupplierBtn: string;
+    shopEmployeeExpensesCard: string;
+    todayLabel: string;
+    allTimeLabel: string;
+    shopRentShort: string;
+    employeeSalaryShort: string;
+    otherShopShort: string;
+    recordExpenseBtn: string;
+    todaySalesProfitCard: string;
+    todayCashShort: string;
+    todayLoansShort: string;
+    todayGrossProfitShort: string;
+    openLedgerBtn: string;
+    openImeiLookupBtn: string;
   };
   customers: {
     pageTitle: string;
@@ -116,6 +136,15 @@ export interface TranslationDict {
     searchPlaceholder: string;
     dueDateInput: string;
     collectIntoLabel: string;
+    partialBadge: string;
+    returnedBadge: string;
+    remainingLabel: string;
+    paidSoFarLabel: string;
+    payAmountInput: string;
+    confirmPayBtn: string;
+    fullAmountBtn: string;
+    returnSrBtn: string;
+    ledgerBtn: string;
   };
   vendors: {
     pageTitle: string;
@@ -134,6 +163,13 @@ export interface TranslationDict {
     filterAll: string;
     filterUnpaid: string;
     searchPlaceholder: string;
+    partialBadge: string;
+    returnedBadge: string;
+    remainingLabel: string;
+    payAmountInput: string;
+    confirmPayBtn: string;
+    returnPrBtn: string;
+    ledgerBtn: string;
   };
   inventory: {
     pageTitle: string;
@@ -141,6 +177,9 @@ export interface TranslationDict {
     addItemTitle: string;
     itemName: string;
     sku: string;
+    brandLabel: string;
+    reorderLevelLabel: string;
+    marginLabel: string;
     category: string;
     costUsd: string;
     sellPriceUsd: string;
@@ -156,6 +195,25 @@ export interface TranslationDict {
     lowStockItemsLabel: string;
     totalStockValueLabel: string;
     retailValueLabel: string;
+    imeiDetailBtn: string;
+    registerBtn: string;
+    inspectorTitle: string;
+    tabImeiDetail: string;
+    tabItemRegister: string;
+    daysInStockLabel: string;
+    supplierLabel: string;
+    purchaseInvLabel: string;
+    purchaseDateLabel: string;
+    soldReceiptLabel: string;
+    imeiStatusInStock: string;
+    imeiStatusSold: string;
+    imeiStatusQuarantined: string;
+    addIncomingImeiTitle: string;
+    imeiNumberPlaceholder: string;
+    addImeiBtn: string;
+    imeiSearchPlaceholder: string;
+    noImeisFound: string;
+    noRegisterEntries: string;
   };
   banking: {
     pageTitle: string;
@@ -173,6 +231,13 @@ export interface TranslationDict {
     filterExpenses: string;
     searchPlaceholder: string;
     allAccountsBtn: string;
+    expenseCategoryLabel: string;
+    catShopRent: string;
+    catEmployeeSalary: string;
+    catUtilities: string;
+    catTransport: string;
+    catOther: string;
+    expenseBreakdownTitle: string;
   };
   posSync: {
     pageTitle: string;
@@ -269,6 +334,40 @@ export interface TranslationDict {
     stockValuationTitle: string;
     stockCostValue: string;
     stockRetailValue: string;
+    tradingPnlTitle: string;
+    tradingPnlSubtitle: string;
+    grossSalesLabel: string;
+    salesReturnsLabel: string;
+    netSalesLabel: string;
+    cogsLabel: string;
+    grossProfitLabel: string;
+    totalPurchasesLabel: string;
+    expensesBreakdownLabel: string;
+    netMarginLabel: string;
+    partyLedgerExplorerTitle: string;
+    partyLedgerExplorerSubtitle: string;
+    customerLedgersLabel: string;
+    supplierLedgersLabel: string;
+    openStatementBtn: string;
+  };
+  ledger: {
+    customerLedgerTitle: string;
+    vendorLedgerTitle: string;
+    refCol: string;
+    typeCol: string;
+    debitCol: string;
+    creditCol: string;
+    balanceCol: string;
+    totalDebitLabel: string;
+    totalCreditLabel: string;
+    closingBalanceLabel: string;
+    printStatementBtn: string;
+    typeInvoice: string;
+    typePayment: string;
+    typeReturnSr: string;
+    typeBill: string;
+    typeBillPayment: string;
+    typeReturnPr: string;
   };
   guide: {
     title: string;
@@ -280,6 +379,8 @@ export interface TranslationDict {
     stepsLabel: string;
     goToPageBtn: string;
     closeBtn: string;
+    suggestedQuestionsLabel: string;
+    relatedTopicsLabel: string;
   };
   backup: {
     sectionTitle: string;
@@ -399,10 +500,30 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       dueSoonAlert: 'due within 48h',
       lowStockAlert: 'low stock',
       unpaidBillsAlert: 'unpaid',
+      dailyPulseTitle: 'Daily Business & Market Trust Pulse',
+      dailyPulseSubtitle: 'Live Afghan shop snapshot: money out in the market on loan, what you owe suppliers, and shop & employee expenses.',
+      marketLoansCard: 'Money in Market (Trust Loans)',
+      marketLoansHolders: 'customers holding loans',
+      collectLoanBtn: 'Collect Loan',
+      supplierDebtCard: 'Owed to Suppliers',
+      paySupplierBtn: 'Pay Supplier',
+      shopEmployeeExpensesCard: 'Shop & Employee Expenses',
+      todayLabel: 'Today',
+      allTimeLabel: 'Total',
+      shopRentShort: 'Shop Rent',
+      employeeSalaryShort: 'Staff Salaries',
+      otherShopShort: 'Utilities / Other',
+      recordExpenseBtn: 'Record Expense',
+      todaySalesProfitCard: 'Today’s Sales & Gross Profit',
+      todayCashShort: 'Cash In',
+      todayLoansShort: 'On Loan',
+      todayGrossProfitShort: 'Gross Profit',
+      openLedgerBtn: 'Customer Ledgers',
+      openImeiLookupBtn: 'Stock & IMEI Lookup',
     },
     customers: {
       pageTitle: 'Customers & Sales Invoices',
-      pageSubtitle: 'Create easy invoices, track who owes you money, and collect payments.',
+      pageSubtitle: 'Create easy invoices, track who owes you money, and collect full or partial payments.',
       newInvoiceTitle: 'Create New Sales Invoice',
       selectCustomer: 'Choose Customer',
       selectProduct: 'Choose Item Sold',
@@ -412,7 +533,7 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       addCustomerTitle: 'Add New Customer',
       addCustomerBtn: 'Add Customer',
       invoicesListTitle: 'Sales Invoices',
-      customersListTitle: 'Customer Directory',
+      customersListTitle: 'Customer Directory & Ledgers',
       receivePaymentBtn: 'Receive Payment',
       balanceOwed: 'Owes You',
       printPdfBtn: 'Print / PDF',
@@ -434,10 +555,19 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       searchPlaceholder: 'Search invoice #, customer, or item...',
       dueDateInput: 'Payment Deadline',
       collectIntoLabel: 'Collect into',
+      partialBadge: 'Partial',
+      returnedBadge: 'Returned (S/R)',
+      remainingLabel: 'Remaining',
+      paidSoFarLabel: 'Paid',
+      payAmountInput: 'Amount to collect today',
+      confirmPayBtn: 'Confirm',
+      fullAmountBtn: 'Full',
+      returnSrBtn: 'Return (S/R)',
+      ledgerBtn: 'Ledger',
     },
     vendors: {
       pageTitle: 'Suppliers & Bills to Pay',
-      pageSubtitle: 'Record supplier bills and pay them directly from your cash drawer or bank.',
+      pageSubtitle: 'Record supplier bills and pay full or partial amounts directly from your cash drawer or bank.',
       enterBillTitle: 'Enter New Supplier Bill',
       selectVendor: 'Choose Supplier',
       billAmountUsd: 'Bill Amount (USD equivalent)',
@@ -445,20 +575,30 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       addVendorTitle: 'Add New Supplier',
       addVendorBtn: 'Add Supplier',
       billsListTitle: 'Supplier Bills',
-      vendorsListTitle: 'Supplier Directory',
+      vendorsListTitle: 'Supplier Directory & Ledgers',
       payBillBtn: 'Pay Bill',
       payFromAccount: 'Pay from account',
       amountYouOwe: 'You Owe',
       filterAll: 'All',
       filterUnpaid: 'Unpaid',
       searchPlaceholder: 'Search bill #, supplier, or details...',
+      partialBadge: 'Partial',
+      returnedBadge: 'Returned (P/R)',
+      remainingLabel: 'Remaining',
+      payAmountInput: 'Amount to pay today',
+      confirmPayBtn: 'Confirm',
+      returnPrBtn: 'Return (P/R)',
+      ledgerBtn: 'Ledger',
     },
     inventory: {
-      pageTitle: 'Items & Store Stock',
-      pageSubtitle: 'Manage phone models, buy cost, sell price, and how many units are on the shelf.',
+      pageTitle: 'Items, Stock & IMEI Detail',
+      pageSubtitle: 'Manage phone models, buy/sell margins, re-order alerts, item registers, and 15-digit IMEIs.',
       addItemTitle: 'Add New Product',
       itemName: 'Product Name',
       sku: 'Product Code (SKU)',
+      brandLabel: 'Brand / Company',
+      reorderLevelLabel: 'Re-Order Level',
+      marginLabel: 'Margin %',
       category: 'Category',
       costUsd: 'Buy Cost (USD)',
       sellPriceUsd: 'Sell Price (USD)',
@@ -466,23 +606,42 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       addItemBtn: 'Add Product',
       stockListTitle: 'Current Store Inventory',
       inStock: 'In Stock',
-      lowStock: 'Low Stock',
+      lowStock: 'Re-Order',
       filterAll: 'All',
-      filterLowStock: 'Low Stock',
-      searchPlaceholder: 'Search product or SKU...',
+      filterLowStock: 'Low Stock / Re-Order',
+      searchPlaceholder: 'Search model, SKU, brand, or 15-digit IMEI...',
       totalSkusLabel: 'Total Products',
-      lowStockItemsLabel: 'Low Stock Alert (<= 2)',
+      lowStockItemsLabel: 'Low Stock / Re-Order Alert',
       totalStockValueLabel: 'Inventory Cost Value',
       retailValueLabel: 'Retail Value',
+      imeiDetailBtn: 'IMEI Detail',
+      registerBtn: 'Register',
+      inspectorTitle: 'Item Register & IMEI Detail',
+      tabImeiDetail: 'IMEI Detail',
+      tabItemRegister: 'Item Register',
+      daysInStockLabel: 'Days in Stock',
+      supplierLabel: 'Supplier',
+      purchaseInvLabel: 'Purchase Ref',
+      purchaseDateLabel: 'Purchase Date',
+      soldReceiptLabel: 'Sold Receipt',
+      imeiStatusInStock: 'In Stock',
+      imeiStatusSold: 'Sold',
+      imeiStatusQuarantined: 'POS Hold',
+      addIncomingImeiTitle: 'Add Incoming 15-Digit IMEI',
+      imeiNumberPlaceholder: 'Enter 15-digit IMEI...',
+      addImeiBtn: 'Add IMEI',
+      imeiSearchPlaceholder: 'Find by IMEI or supplier...',
+      noImeisFound: 'No serialized IMEIs logged for this model yet. Add one below.',
+      noRegisterEntries: 'No sales or return movements recorded for this item yet.',
     },
     banking: {
-      pageTitle: 'Banking & Cash Register',
-      pageSubtitle: 'Check your cash drawer and bank balances, and record daily deposits or shop expenses.',
+      pageTitle: 'Banking, Cash & Shop Expenses',
+      pageSubtitle: 'Check cash & bank balances and track shop rent, employee salaries, and daily deposits.',
       accountsTitle: 'Your Cash & Bank Accounts',
       recordEntryTitle: 'Record Deposit or Expense',
       entryType: 'Entry Type',
       deposit: 'Cash / Bank Deposit (+)',
-      expense: 'Shop Expense / Rent (-)',
+      expense: 'Shop / Employee Expense (-)',
       amountUsd: 'Amount (USD)',
       recordBtn: 'Save Entry',
       registerTitle: 'Account Register History',
@@ -491,6 +650,13 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       filterExpenses: 'Expenses',
       searchPlaceholder: 'Search description or account...',
       allAccountsBtn: 'All Accounts',
+      expenseCategoryLabel: 'Expense Category',
+      catShopRent: 'Shop Rent',
+      catEmployeeSalary: 'Employee Salary & Bonus',
+      catUtilities: 'Utilities & Internet',
+      catTransport: 'Transport & Delivery',
+      catOther: 'Other Shop Expense',
+      expenseBreakdownTitle: 'Recorded Expenses Breakdown',
     },
     posSync: {
       pageTitle: 'Offline POS Sync Fixes (Simple Mode)',
@@ -587,17 +753,53 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stockValuationTitle: 'Store Inventory Value',
       stockCostValue: 'Total Cost Value',
       stockRetailValue: 'Total Retail Value',
+      tradingPnlTitle: 'Trading & Profit & Loss Statement (P&L)',
+      tradingPnlSubtitle: 'Complete Gross Profit, Cost of Goods Sold, Shop & Employee Expenses, and Net Profit.',
+      grossSalesLabel: 'Gross Sales',
+      salesReturnsLabel: 'Less: Sales Returns (S/R)',
+      netSalesLabel: 'Net Sales',
+      cogsLabel: 'Less: Cost of Goods Sold',
+      grossProfitLabel: 'Gross Profit',
+      totalPurchasesLabel: 'Supplier Purchases (Net of P/R)',
+      expensesBreakdownLabel: 'Shop & Employee Expenses Breakdown',
+      netMarginLabel: 'Net Margin',
+      partyLedgerExplorerTitle: 'Party Ledger Explorer (Ledger A/c)',
+      partyLedgerExplorerSubtitle: 'Inspect and print full Debit / Credit account statements for any customer or supplier.',
+      customerLedgersLabel: 'Customer Accounts',
+      supplierLedgersLabel: 'Supplier Accounts',
+      openStatementBtn: 'View Statement',
+    },
+    ledger: {
+      customerLedgerTitle: 'Customer Ledger Statement (Ledger A/c)',
+      vendorLedgerTitle: 'Supplier Ledger Statement (Ledger A/c)',
+      refCol: 'Ref #',
+      typeCol: 'Type',
+      debitCol: 'Debit (+)',
+      creditCol: 'Credit (-)',
+      balanceCol: 'Balance',
+      totalDebitLabel: 'Total Debit',
+      totalCreditLabel: 'Total Credit',
+      closingBalanceLabel: 'Closing Balance',
+      printStatementBtn: 'Print / Save PDF',
+      typeInvoice: 'Sales Invoice',
+      typePayment: 'Payment Received',
+      typeReturnSr: 'Sales Return (S/R)',
+      typeBill: 'Purchase Bill',
+      typeBillPayment: 'Bill Payment',
+      typeReturnPr: 'Purchase Return (P/R)',
     },
     guide: {
       title: 'Easy Step-by-Step Assistant',
-      subtitle: 'Ask anything about how to use any page, or click a topic below.',
-      askPlaceholder: 'Ask a question (e.g., How do I make an invoice?)...',
+      subtitle: 'Ask anything about any feature in plain words, or tap a guide below.',
+      askPlaceholder: 'Ask any question (e.g., How to collect partial loan payment?)...',
       askButton: 'Ask',
-      currentPageTipLabel: 'Guide for the screen you are looking at now:',
-      quickTopicsLabel: 'Common Tasks (Click for Steps)',
+      currentPageTipLabel: 'Step-by-Step Guide Answer:',
+      quickTopicsLabel: 'All App Guides (Click Any Topic)',
       stepsLabel: 'Follow These Simple Steps:',
       goToPageBtn: 'Open That Page',
       closeBtn: 'Close Guide',
+      suggestedQuestionsLabel: 'Common Beginner Questions (Click to Ask)',
+      relatedTopicsLabel: 'Related Guides',
     },
     backup: {
       sectionTitle: 'Data Safety',
@@ -732,10 +934,30 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       dueSoonAlert: 'په ۴۸ ساعتونو کې سررسید',
       lowStockAlert: 'کم موجودي',
       unpaidBillsAlert: 'ناتادیه',
+      dailyPulseTitle: 'د ورځني کاروبار او بازار پورونو نبض',
+      dailyPulseSubtitle: 'په یوه نظر وګورئ: څومره پیسې په بازار کې پور دي، پر عرضه کوونکو څومره پاتې دي او د دوکان و کارکوونکو لګښت څومره دی.',
+      marketLoansCard: 'په بازار کې پیسې (د باور پورونه)',
+      marketLoansHolders: 'پیرودونکي پور لري',
+      collectLoanBtn: 'پور واخلئ',
+      supplierDebtCard: 'پر عرضه کوونکو پور',
+      paySupplierBtn: 'عرضه کوونکي ته تادیه',
+      shopEmployeeExpensesCard: 'د دوکان او کارکوونکو لګښتونه',
+      todayLabel: 'نن',
+      allTimeLabel: 'ټول',
+      shopRentShort: 'د دوکان کرایه',
+      employeeSalaryShort: 'د کارکوونکو معاش',
+      otherShopShort: 'برق / نور لګښت',
+      recordExpenseBtn: 'لګښت ثبت کړئ',
+      todaySalesProfitCard: 'د نن پلور او ناخالصه ګټه',
+      todayCashShort: 'نغد راغلي',
+      todayLoansShort: 'په پور',
+      todayGrossProfitShort: 'ناخالصه ګټه',
+      openLedgerBtn: 'د پیرودونکو کھاتہ',
+      openImeiLookupBtn: 'ګودام او IMEI لټون',
     },
     customers: {
       pageTitle: 'پیرودونکي او د پلور بلونه',
-      pageSubtitle: 'اسانه بلونه جوړ کړئ، طلبات وګورئ او پیسې ترلاسه کړئ.',
+      pageSubtitle: 'اسانه بلونه جوړ کړئ، طلبات وګورئ او بشپړ یا نیمه (قسطي) پیسې ترلاسه کړئ.',
       newInvoiceTitle: 'د پلور نوی بل جوړ کړئ',
       selectCustomer: 'پیرودونکی وټاکئ',
       selectProduct: 'پلورل شوی توکی وټاکئ',
@@ -745,7 +967,7 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       addCustomerTitle: 'نوی پیرودونکی زیات کړئ',
       addCustomerBtn: 'پیرودونکی ثبت کړئ',
       invoicesListTitle: 'د پلور بلونه',
-      customersListTitle: 'د پیرودونکو لست',
+      customersListTitle: 'د پیرودونکو لست او کھاتہ',
       receivePaymentBtn: 'پیسې واخلئ',
       balanceOwed: 'پاتې حساب',
       printPdfBtn: 'چاپ / PDF',
@@ -767,10 +989,19 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       searchPlaceholder: 'د بل شمېره، پیرودونکی یا توکی ولټوئ...',
       dueDateInput: 'د تادیې وروستۍ نېټه',
       collectIntoLabel: 'پیسې کوم حساب ته',
+      partialBadge: 'نیمه تادیه',
+      returnedBadge: 'واپس شوی (S/R)',
+      remainingLabel: 'پاتې',
+      paidSoFarLabel: 'راغلي',
+      payAmountInput: 'نننی مبلغ',
+      confirmPayBtn: 'تایید',
+      fullAmountBtn: 'ټول',
+      returnSrBtn: 'واپسي (S/R)',
+      ledgerBtn: 'حساب (Ledger)',
     },
     vendors: {
       pageTitle: 'عرضه کوونکي او د تادیې بلونه',
-      pageSubtitle: 'د عرضه کوونکو بلونه ثبت کړئ او له دخل یا بانک څخه یې تادیه کړئ.',
+      pageSubtitle: 'د عرضه کوونکو بلونه ثبت کړئ او بشپړ یا نیمه مبلغ له دخل یا بانک څخه تادیه کړئ.',
       enterBillTitle: 'د عرضه کوونکي نوی بل ثبت کړئ',
       selectVendor: 'عرضه کوونکی وټاکئ',
       billAmountUsd: 'د بل مبلغ (ډالر)',
@@ -778,20 +1009,30 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       addVendorTitle: 'نوی عرضه کوونکی زیات کړئ',
       addVendorBtn: 'عرضه کوونکی ثبت کړئ',
       billsListTitle: 'د عرضه کوونکو بلونه',
-      vendorsListTitle: 'د عرضه کوونکو لست',
+      vendorsListTitle: 'د عرضه کوونکو لست او کھاتہ',
       payBillBtn: 'بل تادیه کړئ',
       payFromAccount: 'له کوم حسابه تادیه شي',
       amountYouOwe: 'ستاسو پور',
       filterAll: 'ټول',
       filterUnpaid: 'ناتادیه',
       searchPlaceholder: 'د بل شمېره، عرضه کوونکی یا تشریح ولټوئ...',
+      partialBadge: 'نیمه تادیه',
+      returnedBadge: 'واپس شوی (P/R)',
+      remainingLabel: 'پاتې',
+      payAmountInput: 'نننی مبلغ',
+      confirmPayBtn: 'تایید',
+      returnPrBtn: 'واپسي (P/R)',
+      ledgerBtn: 'حساب (Ledger)',
     },
     inventory: {
-      pageTitle: 'توکي او د پلورنځي ګودام',
-      pageSubtitle: 'د موبایلونو ماډلونه، د اخیستو او پلور بیه او د ګودام تعداد کنټرول کړئ.',
+      pageTitle: 'توکي، ګودام او د IMEI تفصیل',
+      pageSubtitle: 'د موبایلونو ماډلونه، ګټه (%)، د بیا سفارش حد، د توکي راجستر او ۱۵ عددي IMEI کنټرول کړئ.',
       addItemTitle: 'نوی توکی زیات کړئ',
       itemName: 'د توکي نوم',
       sku: 'د توکي کوډ (SKU)',
+      brandLabel: 'برانډ / شرکت',
+      reorderLevelLabel: 'د کمښت حد (Re-Order)',
+      marginLabel: 'ګټه %',
       category: 'کتګوري',
       costUsd: 'د اخیستو بیه (ډالر)',
       sellPriceUsd: 'د پلور بیه (ډالر)',
@@ -801,21 +1042,40 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       inStock: 'په ګودام کې شته',
       lowStock: 'کم شوی دی',
       filterAll: 'ټول',
-      filterLowStock: 'کم شوي توکي',
-      searchPlaceholder: 'توکی یا کوډ (SKU) ولټوئ...',
+      filterLowStock: 'کم شوي / Re-Order',
+      searchPlaceholder: 'توکی، کوډ، برانډ یا ۱۵ عددي IMEI ولټوئ...',
       totalSkusLabel: 'ټول محصولات',
-      lowStockItemsLabel: 'کم شوي توکي (<= ۲)',
+      lowStockItemsLabel: 'کم شوي توکي (Re-Order)',
       totalStockValueLabel: 'د ګودام د اخیستو ارزښت',
       retailValueLabel: 'د پلور ارزښت',
+      imeiDetailBtn: 'IMEI تفصیل',
+      registerBtn: 'راجستر',
+      inspectorTitle: 'د توکي راجستر او IMEI تفصیل',
+      tabImeiDetail: 'IMEI تفصیل',
+      tabItemRegister: 'د توکي راجستر',
+      daysInStockLabel: 'په ګودام کې ورځې',
+      supplierLabel: 'عرضه کوونکی',
+      purchaseInvLabel: 'د خرید بل #',
+      purchaseDateLabel: 'د خرید نېټه',
+      soldReceiptLabel: 'د پلور رسید',
+      imeiStatusInStock: 'په ګودام کې',
+      imeiStatusSold: 'پلورل شوی',
+      imeiStatusQuarantined: 'POS بند',
+      addIncomingImeiTitle: 'نوی ۱۵ عددي IMEI زیات کړئ',
+      imeiNumberPlaceholder: '۱۵ عددي IMEI ولیکئ...',
+      addImeiBtn: 'IMEI ثبت کړئ',
+      imeiSearchPlaceholder: 'د IMEI یا عرضه کوونکي له مخې لټون...',
+      noImeisFound: 'د دې ماډل لپاره لا کوم IMEI نه دی ثبت شوی. لاندې یې زیات کړئ.',
+      noRegisterEntries: 'د دې توکي لپاره لا کوم پلور یا واپسي نه ده ثبت شوې.',
     },
     banking: {
-      pageTitle: 'بانک او د نغدو دخل',
-      pageSubtitle: 'د دخل او بانکي حسابونو بیلانس وګورئ او ورځني لګښتونه یا جمع ثبت کړئ.',
+      pageTitle: 'بانک، نغدې او د دوکان لګښتونه',
+      pageSubtitle: 'دخل وګورئ او د دوکان کرایه، د کارکوونکو معاشونه او ورځنۍ جمع ثبت کړئ.',
       accountsTitle: 'ستاسو نغدي او بانکي حسابونه',
       recordEntryTitle: 'جمع یا لګښت ثبت کړئ',
       entryType: 'د معاملې ډول',
       deposit: 'پیسې جمع کول (+)',
-      expense: 'د دوکان لګښت / کرایه (-)',
+      expense: 'د دوکان / کارکوونکو لګښت (-)',
       amountUsd: 'مبلغ (ډالر)',
       recordBtn: 'معامله ثبت کړئ',
       registerTitle: 'د بانکي او نغدو معاملو تاریخچه',
@@ -824,6 +1084,13 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       filterExpenses: 'لګښتونه',
       searchPlaceholder: 'تشریح یا حساب ولټوئ...',
       allAccountsBtn: 'ټول حسابونه',
+      expenseCategoryLabel: 'د لګښت کټګوري',
+      catShopRent: 'د دوکان کرایه',
+      catEmployeeSalary: 'د کارکوونکو معاش او بخشش',
+      catUtilities: 'برق او انټرنېټ',
+      catTransport: 'ټرانسپورټ / لېږد',
+      catOther: 'نور د دوکان لګښتونه',
+      expenseBreakdownTitle: 'د ثبت شویو لګښتونو تفصیل',
     },
     posSync: {
       pageTitle: 'د آفلاین پلور ستونزې (اسانه حل)',
@@ -920,17 +1187,53 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stockValuationTitle: 'د ګودام د توکو ارزښت',
       stockCostValue: 'د اخیستو ټول ارزښت',
       stockRetailValue: 'د پلور ټول ارزښت',
+      tradingPnlTitle: 'د ګټې او تاوان بشپړ راپور (Trading & P&L)',
+      tradingPnlSubtitle: 'خالص پلور، د توکو اصلي بیه، ناخالصه ګټه، د دوکان و کارکوونکو لګښتونه او خالصه ګټه.',
+      grossSalesLabel: 'ټول پلور (ناخالص)',
+      salesReturnsLabel: 'منفي: د پلور واپسي (S/R)',
+      netSalesLabel: 'خالص پلور',
+      cogsLabel: 'منفي: د پلورل شویو توکو بیه (COGS)',
+      grossProfitLabel: 'ناخالصه ګټه',
+      totalPurchasesLabel: 'له عرضه کوونکو خرید (خالص)',
+      expensesBreakdownLabel: 'د دوکان او کارکوونکو لګښتونو تفصیل',
+      netMarginLabel: 'خالصه فیصدي',
+      partyLedgerExplorerTitle: 'د پیرودونکو او عرضه کوونکو کھاتہ (Ledger A/c)',
+      partyLedgerExplorerSubtitle: 'د هر پیرودونکي یا عرضه کوونکي بشپړ حساب وګورئ او چاپ یې کړئ.',
+      customerLedgersLabel: 'د پیرودونکو حسابونه',
+      supplierLedgersLabel: 'د عرضه کوونکو حسابونه',
+      openStatementBtn: 'حساب وګورئ',
+    },
+    ledger: {
+      customerLedgerTitle: 'د پیرودونکي بشپړ حساب (Ledger A/c)',
+      vendorLedgerTitle: 'د عرضه کوونکي بشپړ حساب (Ledger A/c)',
+      refCol: 'شمېره',
+      typeCol: 'ډول',
+      debitCol: 'جمع / بل (+)',
+      creditCol: 'وصول / تادیه (-)',
+      balanceCol: 'پاتې بیلانس',
+      totalDebitLabel: 'ټول Debit',
+      totalCreditLabel: 'ټول Credit',
+      closingBalanceLabel: 'وروستی بیلانس',
+      printStatementBtn: 'چاپ / PDF خوندي کړئ',
+      typeInvoice: 'د پلور بل',
+      typePayment: 'ترلاسه شوې پیسې',
+      typeReturnSr: 'د پلور واپسي (S/R)',
+      typeBill: 'د خرید بل',
+      typeBillPayment: 'د بل تادیه',
+      typeReturnPr: 'د خرید واپسي (P/R)',
     },
     guide: {
       title: 'اسانه ګام پر ګام لارښود',
-      subtitle: 'د هرې پاڼې د کارولو په اړه پوښتنه وکړئ یا لاندې موضوع کلیک کړئ.',
-      askPlaceholder: 'پوښتنه ولیکئ (لکه: څنګه بل جوړ کړم؟)...',
+      subtitle: 'په ساده ژبه هره پوښتنه ولیکئ یا لاندې چمتو پوښتنې کلیک کړئ.',
+      askPlaceholder: 'هره پوښتنه ولیکئ (لکه: څنګه نیمه پیسې واخلم؟)...',
       askButton: 'وپوښتئ',
-      currentPageTipLabel: 'د اوسنۍ پاڼې لپاره لنډ لارښود:',
-      quickTopicsLabel: 'عام کارونه (د ګامونو لیدلو لپاره کلیک کړئ)',
+      currentPageTipLabel: 'د پوښتنې ګام پر ګام ځواب:',
+      quickTopicsLabel: 'د کاریال ټول لارښودونه',
       stepsLabel: 'دا اسانه ګامونه تعقیب کړئ:',
       goToPageBtn: 'هغه پاڼه پرانیزئ',
       closeBtn: 'لارښود بند کړئ',
+      suggestedQuestionsLabel: 'د پیل کوونکو عامې پوښتنې (کلیک وکړئ)',
+      relatedTopicsLabel: 'اړوند لارښودونه',
     },
     backup: {
       sectionTitle: 'د معلوماتو خوندیتوب',
@@ -1065,10 +1368,30 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       dueSoonAlert: 'سررسید در ۴۸ ساعت آینده',
       lowStockAlert: 'موجودی کم',
       unpaidBillsAlert: 'پرداخت‌نشده',
+      dailyPulseTitle: 'نبض روزانه کاروبار و قرض‌های بازار',
+      dailyPulseSubtitle: 'نمای زنده دوکان: چقدر پول در بازار قرض است، چقدر به فروشندگان بدهکارید و مصارف دوکان و کارمندان چقدر است.',
+      marketLoansCard: 'پول در بازار (قرض مشتریان)',
+      marketLoansHolders: 'مشتری قرضدار',
+      collectLoanBtn: 'دریافت قرض',
+      supplierDebtCard: 'بدهی به فروشندگان',
+      paySupplierBtn: 'پرداخت به فروشنده',
+      shopEmployeeExpensesCard: 'مصارف دوکان و کارمندان',
+      todayLabel: 'امروز',
+      allTimeLabel: 'مجموع',
+      shopRentShort: 'کرایه دوکان',
+      employeeSalaryShort: 'معاش کارمندان',
+      otherShopShort: 'برق / سایر',
+      recordExpenseBtn: 'ثبت مصرف',
+      todaySalesProfitCard: 'فروش و مفاد ناخالص امروز',
+      todayCashShort: 'نقد امروز',
+      todayLoansShort: 'قرض امروز',
+      todayGrossProfitShort: 'مفاد ناخالص',
+      openLedgerBtn: 'صورت‌حساب مشتریان',
+      openImeiLookupBtn: 'گدام و جستجوی IMEI',
     },
     customers: {
       pageTitle: 'مشتریان و بل‌های فروش',
-      pageSubtitle: 'به‌سادگی بل فروش بسازید، حساب مشتریان را ببینید و پول دریافت کنید.',
+      pageSubtitle: 'به‌سادگی بل فروش بسازید، حساب مشتریان را ببینید و پول کامل یا قسطی دریافت کنید.',
       newInvoiceTitle: 'ساخت بل فروش جدید',
       selectCustomer: 'انتخاب مشتری',
       selectProduct: 'انتخاب جنس فروخته شده',
@@ -1078,7 +1401,7 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       addCustomerTitle: 'افزودن مشتری جدید',
       addCustomerBtn: 'ثبت مشتری',
       invoicesListTitle: 'لیست بل‌های فروش',
-      customersListTitle: 'فهرست مشتریان',
+      customersListTitle: 'فهرست و صورت‌حساب مشتریان',
       receivePaymentBtn: 'دریافت پول',
       balanceOwed: 'باقی‌داری مشتری',
       printPdfBtn: 'چاپ / PDF',
@@ -1100,10 +1423,19 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       searchPlaceholder: 'جستجوی شماره بل، مشتری یا جنس...',
       dueDateInput: 'مهلت پرداخت',
       collectIntoLabel: 'واریز پول به حساب',
+      partialBadge: 'پرداخت قسمتی',
+      returnedBadge: 'برگشتی (S/R)',
+      remainingLabel: 'باقی‌مانده',
+      paidSoFarLabel: 'وصول‌شده',
+      payAmountInput: 'مبلغ دریافتی امروز',
+      confirmPayBtn: 'تایید',
+      fullAmountBtn: 'کامل',
+      returnSrBtn: 'برگشت (S/R)',
+      ledgerBtn: 'صورت‌حساب (Ledger)',
     },
     vendors: {
       pageTitle: 'تامین‌کنندگان و بل‌های پرداختنی',
-      pageSubtitle: 'بل‌های خرید را ثبت کنید و مستقیماً از صندوق نقد یا حساب بانکی بپردازید.',
+      pageSubtitle: 'بل‌های خرید را ثبت کنید و به‌صورت کامل یا قسطی از دخل نقد یا بانک بپردازید.',
       enterBillTitle: 'ثبت بل جدید خرید',
       selectVendor: 'انتخاب تامین‌کننده',
       billAmountUsd: 'مبلغ بل (به دالر)',
@@ -1111,20 +1443,30 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       addVendorTitle: 'افزودن تامین‌کننده جدید',
       addVendorBtn: 'ثبت تامین‌کننده',
       billsListTitle: 'لیست بل‌های پرداختنی',
-      vendorsListTitle: 'فهرست تامین‌کنندگان',
+      vendorsListTitle: 'فهرست و صورت‌حساب فروشندگان',
       payBillBtn: 'پرداخت بل',
       payFromAccount: 'پرداخت از حساب',
       amountYouOwe: 'بدهی شما',
       filterAll: 'همه',
       filterUnpaid: 'پرداخت‌نشده',
       searchPlaceholder: 'جستجوی شماره بل، فروشنده یا توضیحات...',
+      partialBadge: 'پرداخت قسمتی',
+      returnedBadge: 'برگشتی (P/R)',
+      remainingLabel: 'باقی‌مانده',
+      payAmountInput: 'مبلغ پرداختی امروز',
+      confirmPayBtn: 'تایید',
+      returnPrBtn: 'برگشت (P/R)',
+      ledgerBtn: 'صورت‌حساب (Ledger)',
     },
     inventory: {
-      pageTitle: 'اجناس و موجودی گدام',
-      pageSubtitle: 'مدل گوشی‌ها، قیمت خرید، قیمت فروش و تعداد موجودی در فروشگاه را مدیریت کنید.',
+      pageTitle: 'اجناس، گدام و جزئیات IMEI',
+      pageSubtitle: 'مدل گوشی‌ها، فیصدی مفاد، هشدار سفارش مجدد، دفتر جنس و شماره‌های ۱۵ رقمی IMEI را مدیریت کنید.',
       addItemTitle: 'افزودن جنس جدید',
       itemName: 'نام محصول',
       sku: 'کد محصول (SKU)',
+      brandLabel: 'برند / شرکت',
+      reorderLevelLabel: 'حد هشدار سفارش',
+      marginLabel: 'مفاد %',
       category: 'بخش',
       costUsd: 'قیمت خرید (دالر)',
       sellPriceUsd: 'قیمت فروش (دالر)',
@@ -1134,21 +1476,40 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       inStock: 'موجود در گدام',
       lowStock: 'موجودی کم',
       filterAll: 'همه',
-      filterLowStock: 'موجودی کم',
-      searchPlaceholder: 'جستجوی محصول یا کد (SKU)...',
+      filterLowStock: 'موجودی کم / Re-Order',
+      searchPlaceholder: 'جستجوی مدل، کد، برند یا شماره ۱۵ رقمی IMEI...',
       totalSkusLabel: 'مجموع محصولات',
-      lowStockItemsLabel: 'اجناس رو به اتمام (<= ۲)',
+      lowStockItemsLabel: 'هشدار سفارش مجدد (Re-Order)',
       totalStockValueLabel: 'ارزش خرید گدام',
       retailValueLabel: 'ارزش فروش',
+      imeiDetailBtn: 'جزئیات IMEI',
+      registerBtn: 'دفتر جنس',
+      inspectorTitle: 'دفتر جنس و جزئیات IMEI',
+      tabImeiDetail: 'جزئیات IMEI',
+      tabItemRegister: 'دفتر جنس',
+      daysInStockLabel: 'روز در گدام',
+      supplierLabel: 'فروشنده',
+      purchaseInvLabel: 'بل خرید #',
+      purchaseDateLabel: 'تاریخ خرید',
+      soldReceiptLabel: 'رسید فروش',
+      imeiStatusInStock: 'موجود',
+      imeiStatusSold: 'فروخته‌شده',
+      imeiStatusQuarantined: 'اختلاف POS',
+      addIncomingImeiTitle: 'افزودن IMEI جدید (۱۵ رقمی)',
+      imeiNumberPlaceholder: 'شماره ۱۵ رقمی IMEI را وارد کنید...',
+      addImeiBtn: 'ثبت IMEI',
+      imeiSearchPlaceholder: 'جستجو با IMEI یا فروشنده...',
+      noImeisFound: 'هنوز هیچ IMEI برای این مدل ثبت نشده است. از پایین اضافه کنید.',
+      noRegisterEntries: 'هنوز هیچ فروش یا برگشتی برای این جنس ثبت نشده است.',
     },
     banking: {
-      pageTitle: 'بانک و صندوق نقد',
-      pageSubtitle: 'موجودی دخل نقد و حساب بانکی را ببینید و واریز یا مصارف روزانه را ثبت کنید.',
+      pageTitle: 'بانک، صندوق نقد و مصارف دوکان',
+      pageSubtitle: 'موجودی دخل و بانک را ببینید و کرایه دوکان، معاش کارمندان و واریزهای روزانه را ثبت کنید.',
       accountsTitle: 'حساب‌های نقدی و بانکی شما',
       recordEntryTitle: 'ثبت واریز یا مصرف روزانه',
       entryType: 'نوع معامله',
       deposit: 'واریز به صندوق / بانک (+)',
-      expense: 'مصارف دوکان / کرایه (-)',
+      expense: 'مصارف دوکان / کارمندان (-)',
       amountUsd: 'مبلغ (دالر)',
       recordBtn: 'ذخیره معامله',
       registerTitle: 'دفتر تاریخچه معاملات حساب',
@@ -1157,6 +1518,13 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       filterExpenses: 'مصارف',
       searchPlaceholder: 'جستجوی توضیحات یا حساب...',
       allAccountsBtn: 'همه حساب‌ها',
+      expenseCategoryLabel: 'نوعیت مصرف',
+      catShopRent: 'کرایه دوکان',
+      catEmployeeSalary: 'معاش و انعام کارمندان',
+      catUtilities: 'برق و انترنت',
+      catTransport: 'ترانسپورت و کرایه راه',
+      catOther: 'سایر مصارف دوکان',
+      expenseBreakdownTitle: 'تفکیک مصارف ثبت‌شده',
     },
     posSync: {
       pageTitle: 'اصلاح رسیدهای آفلاین (حالت ساده)',
@@ -1253,17 +1621,53 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       stockValuationTitle: 'ارزش موجودی گدام',
       stockCostValue: 'ارزش تمام‌شد (خرید)',
       stockRetailValue: 'ارزش فروش',
+      tradingPnlTitle: 'صورت‌حساب کامل مفاد و ضرر (Trading & P&L)',
+      tradingPnlSubtitle: 'فروش خالص، قیمت تمام‌شده اجناس، مفاد ناخالص (%)، مصارف دوکان و کارمندان، و مفاد خالص نهایی.',
+      grossSalesLabel: 'فروش ناخالص',
+      salesReturnsLabel: 'کسر: برگشت از فروش (S/R)',
+      netSalesLabel: 'فروش خالص',
+      cogsLabel: 'کسر: قیمت تمام‌شده اجناس (COGS)',
+      grossProfitLabel: 'مفاد ناخالص',
+      totalPurchasesLabel: 'خرید خالص از فروشندگان',
+      expensesBreakdownLabel: 'تفکیک مصارف دوکان و کارمندان',
+      netMarginLabel: 'حاشیه مفاد خالص',
+      partyLedgerExplorerTitle: 'مرورگر صورت‌حساب طرفین (Ledger A/c)',
+      partyLedgerExplorerSubtitle: 'صورت‌حساب کامل بدهکار و بستانکار هر مشتری یا فروشنده را باز و چاپ کنید.',
+      customerLedgersLabel: 'حساب‌های مشتریان',
+      supplierLedgersLabel: 'حساب‌های فروشندگان',
+      openStatementBtn: 'مشاهده صورت‌حساب',
+    },
+    ledger: {
+      customerLedgerTitle: 'صورت‌حساب مشتری (Ledger A/c)',
+      vendorLedgerTitle: 'صورت‌حساب فروشنده (Ledger A/c)',
+      refCol: 'شماره سند',
+      typeCol: 'نوع',
+      debitCol: 'بدهکار (+)',
+      creditCol: 'بستانکار (-)',
+      balanceCol: 'مانده حساب',
+      totalDebitLabel: 'جمع بدهکار',
+      totalCreditLabel: 'جمع بستانکار',
+      closingBalanceLabel: 'مانده نهایی',
+      printStatementBtn: 'چاپ / ذخیره PDF',
+      typeInvoice: 'بل فروش',
+      typePayment: 'دریافت پول',
+      typeReturnSr: 'برگشت فروش (S/R)',
+      typeBill: 'بل خرید',
+      typeBillPayment: 'پرداخت بل',
+      typeReturnPr: 'برگشت خرید (P/R)',
     },
     guide: {
       title: 'دستیار گام‌به‌گام استفاده از برنامه',
-      subtitle: 'هر سوالی درباره کار با برنامه دارید بپرسید یا موضوعی را انتخاب کنید.',
-      askPlaceholder: 'سوال خود را بنویسید (مثلاً: چطور بل بسازم؟)...',
+      subtitle: 'هر سوالی با زبان ساده بپرسید یا روی یکی از راهنماهای آماده کلیک کنید.',
+      askPlaceholder: 'هر سوالی دارید بنویسید (مثلاً: چطور قسطی پول بگیرم؟)...',
       askButton: 'بپرسید',
-      currentPageTipLabel: 'راهنمای صفحه‌ای که اکنون می‌بینید:',
-      quickTopicsLabel: 'کارهای رایج (برای دیدن مراحل کلیک کنید)',
+      currentPageTipLabel: 'پاسخ گام‌به‌گام راهنما:',
+      quickTopicsLabel: 'همه راهنماهای برنامه',
       stepsLabel: 'این مراحل ساده را دنبال کنید:',
       goToPageBtn: 'رفتن به آن صفحه',
       closeBtn: 'بستن راهنما',
+      suggestedQuestionsLabel: 'سوالات رایج برای شروع (کلیک کنید)',
+      relatedTopicsLabel: 'راهنماهای مرتبط',
     },
     backup: {
       sectionTitle: 'پشتیبان‌گیری و امنیت معلومات',

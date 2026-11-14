@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   AlertTriangle,
   BellRing,
+  BookOpen,
   Calendar,
   Check,
   Clock,
@@ -11,6 +12,7 @@ import {
   MessageSquare,
   Phone,
   Printer,
+  TrendingUp,
   Wallet,
   X,
 } from 'lucide-react';
@@ -20,10 +22,16 @@ import {
   computeAccountingSummary,
   computeOutstandingLoansReport,
   computePeriodSalesReport,
+  computeProfitAndLossStatement,
   formatAmount,
+  getBillPaidUsd,
+  getBillRemainingUsd,
+  getInvoicePaidUsd,
+  getInvoiceRemainingUsd,
 } from '../../utils/accountingEngine';
 import { buildPaymentReminderMessage } from '../../utils/reminderMessage';
 import { usePageTheme } from '../../utils/ThemeContext';
+import { PartyLedgerModal } from '../PartyLedgerModal';
 
 const REMINDED_STORAGE_KEY = 'meridian_ledger_pro_reminded_v4';
 
@@ -71,8 +79,13 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
   const [reminderMessage, setReminderMessage] = useState('');
   const [copiedReminder, setCopiedReminder] = useState(false);
   const [remindedInvoiceIds, setRemindedInvoiceIds] = useState<Record<string, boolean>>(loadRemindedIds);
+  const [ledgerTarget, setLedgerTarget] = useState<{
+    kind: 'customer' | 'vendor';
+    partyId: string;
+  } | null>(null);
 
   const summary = computeAccountingSummary(state);
+  const pnl = computeProfitAndLossStatement(state);
   const periodReport = computePeriodSalesReport(state, period, anchorDate);
   const outstandingLoans = computeOutstandingLoansReport(state);
   const overdueCustomerCount = outstandingLoans.customers.filter((c) => c.hasOverdue).length;
@@ -122,8 +135,8 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
     setReminderTarget(null);
   };
 
-  const unpaidInvoices = state.invoices.filter((i) => i.status === 'unpaid');
-  const unpaidBills = state.bills.filter((b) => b.status === 'unpaid');
+  const unpaidInvoices = state.invoices.filter((i) => getInvoiceRemainingUsd(i) > 0);
+  const unpaidBills = state.bills.filter((b) => getBillRemainingUsd(b) > 0);
 
   const handleExportLoansCsv = () => {
     const rows: string[][] = [
@@ -166,9 +179,13 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
     const rows = [
       ['Metric', 'Value'],
       ['Currency', state.currency],
+      ['Gross Sales', formatAmount(pnl.grossSalesUsd, state.currency)],
+      ['Net Sales', formatAmount(pnl.netSalesUsd, state.currency)],
+      ['Gross Profit', formatAmount(pnl.grossProfitUsd, state.currency)],
+      ['Total Shop & Employee Expenses', formatAmount(pnl.totalShopExpensesUsd, state.currency)],
+      ['Net Profit (Trading & P&L)', formatAmount(pnl.netProfitUsd, state.currency)],
       ['Paid Sales Income', formatAmount(summary.paidRevenueUsd, state.currency)],
       ['Paid Bills & Expenses', formatAmount(summary.paidExpensesUsd, state.currency)],
-      ['Net Profit', formatAmount(summary.netProfitUsd, state.currency)],
       ['Total Cash & Bank', formatAmount(summary.totalCashUsd, state.currency)],
       ['Customer Receivables', formatAmount(summary.totalReceivablesUsd, state.currency)],
       ['Vendor Payables', formatAmount(summary.totalPayablesUsd, state.currency)],
@@ -288,7 +305,6 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
-              {/* Period Tabs */}
               <div
                 role="group"
                 aria-label="Period selector"
@@ -314,7 +330,6 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
                 })}
               </div>
 
-              {/* Date Picker + Today Shortcut */}
               <div className="inline-flex items-center gap-1.5">
                 <label className="inline-flex items-center gap-1.5 bg-white border border-slate-300 rounded-md px-2.5 py-1.5 text-xs text-slate-700">
                   <Calendar size={13} className={theme.accentText} aria-hidden="true" />
@@ -347,7 +362,6 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
           </div>
 
           <div className="p-5 space-y-5">
-            {/* Covered Dates Strip */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 pb-3 border-b border-slate-100">
               <span>
                 {t.reports.dateRangeLabel}:{' '}
@@ -362,7 +376,6 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
               </span>
             </div>
 
-            {/* 4 Period Summary Numbers */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className={`border ${theme.cardBorder} rounded-md p-4 bg-[#FAF9FC]`}>
                 <p className="text-xs font-medium text-slate-600">{t.reports.unitsSoldLabel}</p>
@@ -399,9 +412,7 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
               </div>
             </div>
 
-            {/* Items Sold & Loans Given Tables */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Items Sold & Prices */}
               <div className={`border ${theme.cardBorder} rounded-md overflow-hidden`}>
                 <div className={`px-4 py-3 border-b ${theme.cardBorder} ${theme.subtleCardBg}`}>
                   <h3 className={`font-display text-sm font-bold ${theme.headingText}`}>
@@ -427,7 +438,7 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
                           <th className="px-3 py-2 text-xs font-semibold text-slate-700 text-end">
                             {t.reports.cashPortionLabel}
                           </th>
-                          <th className="px-3.5 py-2 text-xs font-semibold text-slate-700 text-end">
+                          <th className="px-3 py-2 text-xs font-semibold text-slate-700 text-end">
                             {t.reports.loanPortionLabel}
                           </th>
                         </tr>
@@ -438,13 +449,13 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
                             <td className="px-3.5 py-2.5 font-medium text-slate-900">
                               {item.productName}
                             </td>
-                            <td className="px-3 py-2.5 text-end font-semibold tabular-nums text-slate-900">
+                            <td className="px-3.5 py-2.5 text-end font-semibold tabular-nums text-slate-900">
                               {item.quantitySold}
                             </td>
-                            <td className="px-3 py-2.5 text-end tabular-nums text-slate-700 whitespace-nowrap">
+                            <td className="px-3.5 py-2.5 text-end tabular-nums text-slate-700 whitespace-nowrap">
                               {formatAmount(item.unitPriceUsd, state.currency)}
                             </td>
-                            <td className="px-3 py-2.5 text-end tabular-nums font-medium text-[#2E6B52] whitespace-nowrap">
+                            <td className="px-3.5 py-2.5 text-end tabular-nums font-medium text-[#2E6B52] whitespace-nowrap">
                               {formatAmount(item.cashPaidUsd, state.currency)}
                             </td>
                             <td className="px-3.5 py-2.5 text-end tabular-nums font-medium text-[#8A5A2B] whitespace-nowrap">
@@ -458,7 +469,6 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
                 )}
               </div>
 
-              {/* Loans & With Whom */}
               <div className={`border ${theme.cardBorder} rounded-md overflow-hidden`}>
                 <div className={`px-4 py-3 border-b ${theme.cardBorder} ${theme.subtleCardBg}`}>
                   <h3 className={`font-display text-sm font-bold ${theme.headingText}`}>
@@ -480,7 +490,7 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
                           <th className="px-3 py-2 text-xs font-semibold text-slate-700 text-start">
                             {t.reports.itemAndQtyLabel}
                           </th>
-                          <th className="px-3.5 py-2 text-xs font-semibold text-slate-700 text-end">
+                          <th className="px-3 py-2 text-xs font-semibold text-slate-700 text-end">
                             {t.reports.loanAmountLabel}
                           </th>
                         </tr>
@@ -494,7 +504,7 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
                                 {loan.customerPhone} · {loan.customerCity}
                               </div>
                             </td>
-                            <td className="px-3 py-2.5 text-slate-700">
+                            <td className="px-3.5 py-2.5 text-slate-700">
                               <div>
                                 {loan.productName} × {loan.quantity} @{' '}
                                 {formatAmount(loan.unitPriceUsd, state.currency)}
@@ -653,6 +663,14 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
                             {formatAmount(cust.totalUnpaidUsd, state.currency)}
                           </span>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => setLedgerTarget({ kind: 'customer', partyId: cust.customerId })}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors whitespace-nowrap print:hidden"
+                        >
+                          <BookOpen size={12} aria-hidden="true" />
+                          <span>{t.customers.ledgerBtn}</span>
+                        </button>
                         {urgentLoan && (
                           <button
                             type="button"
@@ -820,64 +838,245 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
           )}
         </section>
 
-        {/* Overall Profit & Inventory Valuation */}
+        {/* Marg-Style Trading & Profit & Loss Statement + Stock Valuation */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Profit & Loss */}
           <section className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}>
-            <h2 className={`font-display text-base font-bold ${theme.headingText}`}>
-              {t.reports.profitLossTitle}
-            </h2>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h2 className={`font-display text-base font-bold ${theme.headingText} flex items-center gap-2`}>
+                  <TrendingUp size={16} className={theme.accentText} aria-hidden="true" />
+                  <span>{t.reports.tradingPnlTitle}</span>
+                </h2>
+                <p className="text-xs text-slate-600 mt-0.5">{t.reports.tradingPnlSubtitle}</p>
+              </div>
+              <span className="px-2 py-0.5 rounded border border-emerald-200 bg-emerald-50 text-[#1E4234] text-xs font-bold tabular-nums">
+                {t.inventory.marginLabel}: {pnl.grossMarginPct}%
+              </span>
+            </div>
+
             <div className="divide-y divide-slate-100 text-sm">
-              <div className="py-2.5 flex items-center justify-between">
-                <span className="text-slate-700">{t.reports.totalSalesCollected}</span>
-                <span className="font-semibold text-[#2E6B52] tabular-nums">
-                  {formatAmount(summary.paidRevenueUsd, state.currency)}
+              <div className="py-2 flex items-center justify-between">
+                <span className="text-slate-700">{t.reports.grossSalesLabel}</span>
+                <span className="font-semibold text-slate-900 tabular-nums">
+                  {formatAmount(pnl.grossSalesUsd, state.currency)}
                 </span>
               </div>
-              <div className="py-2.5 flex items-center justify-between">
-                <span className="text-slate-700">{t.reports.totalExpensesPaid}</span>
+              <div className="py-2 flex items-center justify-between">
+                <span className="text-slate-700">{t.reports.salesReturnsLabel}</span>
                 <span className="font-semibold text-[#8C3B3B] tabular-nums">
-                  - {formatAmount(summary.paidExpensesUsd, state.currency)}
+                  - {formatAmount(pnl.salesReturnsUsd, state.currency)}
                 </span>
+              </div>
+              <div className="py-2 flex items-center justify-between">
+                <span className="font-medium text-slate-900">{t.reports.netSalesLabel}</span>
+                <span className="font-semibold text-slate-900 tabular-nums">
+                  {formatAmount(pnl.netSalesUsd, state.currency)}
+                </span>
+              </div>
+              <div className="py-2 flex items-center justify-between">
+                <span className="text-slate-700">{t.reports.cogsLabel}</span>
+                <span className="font-semibold text-slate-700 tabular-nums">
+                  - {formatAmount(pnl.costOfGoodsSoldUsd, state.currency)}
+                </span>
+              </div>
+              <div className={`py-2.5 flex items-center justify-between ${theme.subtleCardBg} px-2 rounded`}>
+                <span className="font-bold text-slate-900">{t.reports.grossProfitLabel}</span>
+                <span className="font-bold text-[#2E6B52] tabular-nums">
+                  {formatAmount(pnl.grossProfitUsd, state.currency)} ({pnl.grossMarginPct}%)
+                </span>
+              </div>
+              <div className="py-2 flex items-center justify-between">
+                <span className="text-slate-700">{t.reports.totalPurchasesLabel}</span>
+                <span className="font-semibold text-slate-700 tabular-nums">
+                  {formatAmount(pnl.totalPurchasesUsd, state.currency)}
+                </span>
+              </div>
+              <div className="py-2 space-y-1">
+                <div className="flex items-center justify-between font-medium text-slate-800">
+                  <span>{t.reports.expensesBreakdownLabel}</span>
+                  <span className="font-semibold text-[#8C3B3B] tabular-nums">
+                    - {formatAmount(pnl.totalShopExpensesUsd, state.currency)}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 ps-3 text-xs text-slate-600 tabular-nums">
+                  <div className="flex justify-between">
+                    <span>{t.banking.catEmployeeSalary}</span>
+                    <span>{formatAmount(pnl.expensesBreakdown.employee_salary, state.currency)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t.banking.catShopRent}</span>
+                    <span>{formatAmount(pnl.expensesBreakdown.shop_rent, state.currency)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t.banking.catUtilities}</span>
+                    <span>{formatAmount(pnl.expensesBreakdown.utilities_internet, state.currency)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t.banking.catTransport} / {t.banking.catOther}</span>
+                    <span>
+                      {formatAmount(
+                        pnl.expensesBreakdown.transport + pnl.expensesBreakdown.other,
+                        state.currency
+                      )}
+                    </span>
+                  </div>
+                </div>
               </div>
               <div className="pt-3 flex items-center justify-between text-base font-bold">
-                <span className="text-slate-900">{t.reports.netProfitLabel}</span>
+                <span className="text-slate-900">
+                  {t.reports.netProfitLabel} ({t.reports.netMarginLabel}: {pnl.netMarginPct}%)
+                </span>
                 <span
                   className={`tabular-nums ${
-                    summary.netProfitUsd >= 0 ? theme.accentText : 'text-[#8C3B3B]'
+                    pnl.netProfitUsd >= 0 ? theme.accentText : 'text-[#8C3B3B]'
                   }`}
                 >
-                  {formatAmount(summary.netProfitUsd, state.currency)}
+                  {formatAmount(pnl.netProfitUsd, state.currency)}
                 </span>
               </div>
             </div>
           </section>
 
-          {/* Inventory Value */}
-          <section className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}>
-            <h2 className={`font-display text-base font-bold ${theme.headingText}`}>
-              {t.reports.stockValuationTitle}
-            </h2>
-            <div className="divide-y divide-slate-100 text-sm">
-              <div className="py-2.5 flex items-center justify-between">
-                <span className="text-slate-700">{t.reports.stockCostValue}</span>
-                <span className="font-semibold text-slate-900 tabular-nums">
-                  {formatAmount(summary.totalInventoryCostUsd, state.currency)}
-                </span>
+          {/* Cash Flow & Inventory Valuation */}
+          <div className="space-y-6">
+            <section className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}>
+              <h2 className={`font-display text-base font-bold ${theme.headingText}`}>
+                {t.reports.profitLossTitle}
+              </h2>
+              <div className="divide-y divide-slate-100 text-sm">
+                <div className="py-2.5 flex items-center justify-between">
+                  <span className="text-slate-700">{t.reports.totalSalesCollected}</span>
+                  <span className="font-semibold text-[#2E6B52] tabular-nums">
+                    {formatAmount(summary.paidRevenueUsd, state.currency)}
+                  </span>
+                </div>
+                <div className="py-2.5 flex items-center justify-between">
+                  <span className="text-slate-700">{t.reports.totalExpensesPaid}</span>
+                  <span className="font-semibold text-[#8C3B3B] tabular-nums">
+                    - {formatAmount(summary.paidExpensesUsd, state.currency)}
+                  </span>
+                </div>
+                <div className="pt-3 flex items-center justify-between text-base font-bold">
+                  <span className="text-slate-900">{t.reports.netProfitLabel}</span>
+                  <span
+                    className={`tabular-nums ${
+                      summary.netProfitUsd >= 0 ? theme.accentText : 'text-[#8C3B3B]'
+                    }`}
+                  >
+                    {formatAmount(summary.netProfitUsd, state.currency)}
+                  </span>
+                </div>
               </div>
-              <div className="py-2.5 flex items-center justify-between">
-                <span className="text-slate-700">{t.reports.stockRetailValue}</span>
-                <span className="font-semibold text-[#435384] tabular-nums">
-                  {formatAmount(summary.totalInventoryRetailUsd, state.currency)}
-                </span>
+            </section>
+
+            <section className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}>
+              <h2 className={`font-display text-base font-bold ${theme.headingText}`}>
+                {t.reports.stockValuationTitle}
+              </h2>
+              <div className="divide-y divide-slate-100 text-sm">
+                <div className="py-2.5 flex items-center justify-between">
+                  <span className="text-slate-700">{t.reports.stockCostValue}</span>
+                  <span className="font-semibold text-slate-900 tabular-nums">
+                    {formatAmount(summary.totalInventoryCostUsd, state.currency)}
+                  </span>
+                </div>
+                <div className="py-2.5 flex items-center justify-between">
+                  <span className="text-slate-700">{t.reports.stockRetailValue}</span>
+                  <span className="font-semibold text-[#435384] tabular-nums">
+                    {formatAmount(summary.totalInventoryRetailUsd, state.currency)}
+                  </span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        {/* Party Ledger Explorer (Ledger A/c) */}
+        <section
+          aria-label={t.reports.partyLedgerExplorerTitle}
+          className={`bg-white border ${theme.cardBorder} rounded-lg overflow-hidden`}
+        >
+          <div className={`px-5 py-4 border-b ${theme.cardBorder} ${theme.subtleCardBg}`}>
+            <h2 className={`font-display text-base font-bold ${theme.headingText} flex items-center gap-2`}>
+              <BookOpen size={16} className={theme.accentText} aria-hidden="true" />
+              <span>{t.reports.partyLedgerExplorerTitle}</span>
+            </h2>
+            <p className="text-xs text-slate-600 mt-0.5">{t.reports.partyLedgerExplorerSubtitle}</p>
+          </div>
+
+          <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2.5">
+                {t.reports.customerLedgersLabel} ({state.customers.length})
+              </h3>
+              <div className="divide-y divide-slate-100 border border-slate-200 rounded-md">
+                {state.customers.map((cust) => (
+                  <div key={cust.id} className="px-3.5 py-2.5 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-slate-900 truncate">{cust.name}</div>
+                      <div className="text-xs text-slate-500 font-mono">
+                        {cust.phone} · {cust.city}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <span
+                        className={`text-xs font-bold tabular-nums ${
+                          cust.balanceUsd > 0 ? 'text-[#8A5A2B]' : 'text-[#2E6B52]'
+                        }`}
+                      >
+                        {formatAmount(cust.balanceUsd, state.currency)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setLedgerTarget({ kind: 'customer', partyId: cust.id })}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded border ${theme.navActiveBorder} bg-white hover:bg-slate-50 ${theme.headingText} print:hidden`}
+                      >
+                        {t.reports.openStatementBtn}
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </section>
-        </div>
+
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2.5">
+                {t.reports.supplierLedgersLabel} ({state.vendors.length})
+              </h3>
+              <div className="divide-y divide-slate-100 border border-slate-200 rounded-md">
+                {state.vendors.map((vend) => (
+                  <div key={vend.id} className="px-3.5 py-2.5 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-slate-900 truncate">{vend.name}</div>
+                      <div className="text-xs text-slate-500 font-mono">
+                        {vend.phone} · {vend.city}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <span
+                        className={`text-xs font-bold tabular-nums ${
+                          vend.balanceUsd > 0 ? 'text-[#8C3B3B]' : 'text-[#2E6B52]'
+                        }`}
+                      >
+                        {formatAmount(vend.balanceUsd, state.currency)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setLedgerTarget({ kind: 'vendor', partyId: vend.id })}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded border ${theme.navActiveBorder} bg-white hover:bg-slate-50 ${theme.headingText} print:hidden`}
+                      >
+                        {t.reports.openStatementBtn}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* All Open Receivables & Payables */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Unpaid Receivables */}
           <section className={`bg-white border ${theme.cardBorder} rounded-lg overflow-hidden`}>
             <div className={`px-5 py-3.5 border-b ${theme.cardBorder} ${theme.subtleCardBg} flex items-center justify-between gap-2`}>
               <h2 className={`font-display text-sm font-bold ${theme.headingText}`}>
@@ -897,24 +1096,34 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
               {unpaidInvoices.length === 0 ? (
                 <p className="p-5 text-sm text-slate-500">{t.common.noRecords}</p>
               ) : (
-                unpaidInvoices.map((inv) => (
-                  <div key={inv.id} className="px-5 py-3 flex items-center justify-between text-sm hover:bg-slate-50/70">
-                    <div>
-                      <div className="font-medium text-slate-900">{inv.customerName}</div>
-                      <div className="text-xs font-mono text-slate-500">
-                        {inv.invoiceNumber} · {inv.dueDate}
+                unpaidInvoices.map((inv) => {
+                  const paid = getInvoicePaidUsd(inv);
+                  const rem = getInvoiceRemainingUsd(inv);
+                  return (
+                    <div key={inv.id} className="px-5 py-3 flex items-center justify-between text-sm hover:bg-slate-50/70">
+                      <div>
+                        <div className="font-medium text-slate-900 flex items-center gap-2">
+                          <span>{inv.customerName}</span>
+                          {paid > 0 && (
+                            <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-100 text-amber-900 border border-amber-300">
+                              {t.customers.partialBadge}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs font-mono text-slate-500">
+                          {inv.invoiceNumber} · {inv.dueDate}
+                        </div>
                       </div>
+                      <span className="font-semibold text-[#2E6B52] tabular-nums">
+                        {formatAmount(rem, state.currency)}
+                      </span>
                     </div>
-                    <span className="font-semibold text-[#2E6B52] tabular-nums">
-                      {formatAmount(inv.totalUsd, state.currency)}
-                    </span>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </section>
 
-          {/* Unpaid Payables */}
           <section className={`bg-white border ${theme.cardBorder} rounded-lg overflow-hidden`}>
             <div className={`px-5 py-3.5 border-b ${theme.cardBorder} ${theme.subtleCardBg} flex items-center justify-between gap-2`}>
               <h2 className={`font-display text-sm font-bold ${theme.headingText}`}>
@@ -934,19 +1143,30 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
               {unpaidBills.length === 0 ? (
                 <p className="p-5 text-sm text-slate-500">{t.common.noRecords}</p>
               ) : (
-                unpaidBills.map((bill) => (
-                  <div key={bill.id} className="px-5 py-3 flex items-center justify-between text-sm">
-                    <div>
-                      <div className="font-medium text-slate-900">{bill.vendorName}</div>
-                      <div className="text-xs font-mono text-slate-500">
-                        {bill.billNumber} · {bill.dueDate}
+                unpaidBills.map((bill) => {
+                  const paid = getBillPaidUsd(bill);
+                  const rem = getBillRemainingUsd(bill);
+                  return (
+                    <div key={bill.id} className="px-5 py-3 flex items-center justify-between text-sm">
+                      <div>
+                        <div className="font-medium text-slate-900 flex items-center gap-2">
+                          <span>{bill.vendorName}</span>
+                          {paid > 0 && (
+                            <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-100 text-amber-900 border border-amber-300">
+                              {t.vendors.partialBadge}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs font-mono text-slate-500">
+                          {bill.billNumber} · {bill.dueDate}
+                        </div>
                       </div>
+                      <span className="font-semibold text-[#8A5A2B] tabular-nums">
+                        {formatAmount(rem, state.currency)}
+                      </span>
                     </div>
-                    <span className="font-semibold text-[#8A5A2B] tabular-nums">
-                      {formatAmount(bill.totalUsd, state.currency)}
-                    </span>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </section>
@@ -1059,6 +1279,16 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
             </div>
           </div>
         </div>
+      )}
+
+      {ledgerTarget && (
+        <PartyLedgerModal
+          kind={ledgerTarget.kind}
+          partyId={ledgerTarget.partyId}
+          state={state}
+          onClose={() => setLedgerTarget(null)}
+          t={t}
+        />
       )}
     </div>
   );

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, BookOpen, HelpCircle, Send, X } from 'lucide-react';
+import { ArrowRight, BookOpen, HelpCircle, Send, Sparkles, X } from 'lucide-react';
 import type { TranslationDict } from '../i18n/translations';
 import type { AppLanguage, AppPage } from '../types/accounting';
 import {
   answerGuideQuestion,
+  findMatchingGuideTopics,
   getPageQuickGuide,
   GUIDE_TOPICS,
+  SUGGESTED_QUESTIONS,
   type GuideTopic,
 } from '../utils/guideBot';
 import { usePageTheme } from '../utils/ThemeContext';
@@ -32,18 +34,30 @@ export function GuideBotDrawer({
   const [activeTopic, setActiveTopic] = useState<GuideTopic>(() =>
     getPageQuickGuide(currentPage, language)
   );
+  const [relatedTopics, setRelatedTopics] = useState<GuideTopic[]>([]);
 
   useEffect(() => {
     setActiveTopic(getPageQuickGuide(currentPage, language));
+    setRelatedTopics([]);
   }, [currentPage, language]);
 
   if (!open) return null;
 
+  const runSearch = (queryText: string) => {
+    const matched = answerGuideQuestion(queryText, language, currentPage);
+    setActiveTopic(matched);
+    const others = findMatchingGuideTopics(queryText, language, 4).filter(
+      (item) => item.id !== matched.id
+    );
+    setRelatedTopics(others);
+  };
+
   const handleAsk = (e: React.FormEvent) => {
     e.preventDefault();
-    const matched = answerGuideQuestion(question, language, currentPage);
-    setActiveTopic(matched);
+    runSearch(question);
   };
+
+  const suggested = SUGGESTED_QUESTIONS[language] || SUGGESTED_QUESTIONS.en;
 
   return (
     <aside
@@ -68,7 +82,7 @@ export function GuideBotDrawer({
         </button>
       </div>
 
-      <form onSubmit={handleAsk} className="p-4 border-b border-slate-200 bg-slate-50 shrink-0">
+      <form onSubmit={handleAsk} className="p-4 border-b border-slate-200 bg-slate-50 shrink-0 space-y-3">
         <label htmlFor="guide-bot-input" className="sr-only">
           {t.guide.askPlaceholder}
         </label>
@@ -89,9 +103,31 @@ export function GuideBotDrawer({
             <span>{t.guide.askButton}</span>
           </button>
         </div>
+
+        <div>
+          <p className="text-[11px] font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
+            <Sparkles size={11} className={theme.accentText} aria-hidden="true" />
+            <span>{t.guide.suggestedQuestionsLabel}</span>
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {suggested.map((qText) => (
+              <button
+                key={qText}
+                type="button"
+                onClick={() => {
+                  setQuestion(qText);
+                  runSearch(qText);
+                }}
+                className="text-start px-2.5 py-1 text-[11px] font-medium bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-100 text-slate-800 rounded transition-colors"
+              >
+                {qText}
+              </button>
+            ))}
+          </div>
+        </div>
       </form>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-6">
+      <div className="flex-1 overflow-y-auto p-5 space-y-5">
         <div className={`${theme.subtleCardBg} border ${theme.cardBorder} rounded-lg p-4 space-y-3`}>
           <div className={`flex items-center gap-2 text-xs font-semibold ${theme.headingText}`}>
             <BookOpen size={14} aria-hidden="true" />
@@ -140,9 +176,29 @@ export function GuideBotDrawer({
           )}
         </div>
 
+        {relatedTopics.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-slate-600 mb-2">
+              {t.guide.relatedTopicsLabel}
+            </p>
+            <div className="space-y-1.5">
+              {relatedTopics.map((topic) => (
+                <button
+                  key={topic.id}
+                  type="button"
+                  onClick={() => setActiveTopic(topic)}
+                  className={`w-full text-start px-3.5 py-2 rounded-md border ${theme.cardBorder} bg-white hover:bg-slate-50 text-xs font-semibold ${theme.headingText} transition-colors`}
+                >
+                  {topic.label[language]}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div>
           <p className="text-xs font-semibold text-slate-600 mb-2.5">
-            {t.guide.quickTopicsLabel}
+            {t.guide.quickTopicsLabel} ({GUIDE_TOPICS.length})
           </p>
           <div className="space-y-1.5">
             {GUIDE_TOPICS.map((topic) => {

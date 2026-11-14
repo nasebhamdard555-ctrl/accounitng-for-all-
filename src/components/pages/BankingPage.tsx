@@ -1,8 +1,12 @@
 import { useState } from 'react';
-import { ArrowDownLeft, ArrowUpRight, Building2, PlusCircle, Search } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Building2, PlusCircle, Search, Tag } from 'lucide-react';
 import type { TranslationDict } from '../../i18n/translations';
-import type { AccountingState } from '../../types/accounting';
-import { formatAmount } from '../../utils/accountingEngine';
+import type { AccountingState, ExpenseCategory } from '../../types/accounting';
+import {
+  computeDailyBusinessPulse,
+  formatAmount,
+  inferExpenseCategory,
+} from '../../utils/accountingEngine';
 import { usePageTheme } from '../../utils/ThemeContext';
 
 interface BankingPageProps {
@@ -12,6 +16,7 @@ interface BankingPageProps {
     type: 'deposit' | 'expense';
     description: string;
     amountUsd: number;
+    expenseCategory?: ExpenseCategory;
   }) => { ok: boolean; error?: string };
   t: TranslationDict;
 }
@@ -20,6 +25,7 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
   const theme = usePageTheme('banking');
   const [accountId, setAccountId] = useState(state.bankAccounts[0]?.id || '');
   const [entryType, setEntryType] = useState<'deposit' | 'expense'>('expense');
+  const [expenseCategory, setExpenseCategory] = useState<ExpenseCategory>('shop_rent');
   const [description, setDescription] = useState('');
   const [amountUsd, setAmountUsd] = useState('50');
   const [entryFilter, setEntryFilter] = useState<'all' | 'deposit' | 'expense'>('all');
@@ -30,6 +36,16 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
   const activeAccountId = state.bankAccounts.some((a) => a.id === accountId)
     ? accountId
     : state.bankAccounts[0]?.id || '';
+
+  const pulse = computeDailyBusinessPulse(state);
+
+  const categoryLabels: Record<ExpenseCategory, string> = {
+    employee_salary: t.banking.catEmployeeSalary,
+    shop_rent: t.banking.catShopRent,
+    utilities_internet: t.banking.catUtilities,
+    transport: t.banking.catTransport,
+    other: t.banking.catOther,
+  };
 
   const accountFilteredTxs =
     selectedAccountFilter === 'all'
@@ -43,9 +59,11 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
     if (entryFilter === 'deposit' && tx.amountUsd < 0) return false;
     if (entryFilter === 'expense' && tx.amountUsd >= 0) return false;
     if (!normalizedTxSearch) return true;
+    const catLabel = tx.type === 'expense' ? categoryLabels[inferExpenseCategory(tx)].toLowerCase() : '';
     return (
       tx.description.toLowerCase().includes(normalizedTxSearch) ||
-      tx.accountName.toLowerCase().includes(normalizedTxSearch)
+      tx.accountName.toLowerCase().includes(normalizedTxSearch) ||
+      catLabel.includes(normalizedTxSearch)
     );
   });
 
@@ -56,6 +74,7 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
       type: entryType,
       description,
       amountUsd: Number(amountUsd),
+      expenseCategory: entryType === 'expense' ? expenseCategory : undefined,
     });
     if (!res.ok) {
       setFeedback({ type: 'err', text: res.error || 'Could not record transaction.' });
@@ -65,6 +84,14 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
     setAmountUsd('50');
     setFeedback({ type: 'ok', text: `${t.banking.recordBtn} — ${t.common.save}` });
   };
+
+  const expenseCategoriesOrder: ExpenseCategory[] = [
+    'employee_salary',
+    'shop_rent',
+    'utilities_internet',
+    'transport',
+    'other',
+  ];
 
   return (
     <div className={`flex-1 ${theme.canvasBg} overflow-y-auto`}>
@@ -138,7 +165,7 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
             <h2 className="font-display text-base font-bold">{t.banking.recordEntryTitle}</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label htmlFor="bank-acct" className="block text-xs font-semibold text-slate-700 mb-1">
                 {t.common.account}
@@ -172,7 +199,27 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
               </select>
             </div>
 
-            <div>
+            {entryType === 'expense' && (
+              <div>
+                <label htmlFor="bank-exp-cat" className="block text-xs font-semibold text-slate-700 mb-1">
+                  {t.banking.expenseCategoryLabel}
+                </label>
+                <select
+                  id="bank-exp-cat"
+                  value={expenseCategory}
+                  onChange={(e) => setExpenseCategory(e.target.value as ExpenseCategory)}
+                  className={`w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 ${theme.accentRing}`}
+                >
+                  {expenseCategoriesOrder.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {categoryLabels[cat]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className={entryType === 'expense' ? '' : 'lg:col-span-2'}>
               <label htmlFor="bank-desc" className="block text-xs font-semibold text-slate-700 mb-1">
                 {t.common.description}
               </label>
@@ -181,7 +228,11 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="e.g., Shop rent / Cash deposit"
+                placeholder={
+                  entryType === 'expense'
+                    ? 'e.g., Staff salary / Shop rent / Electricity'
+                    : 'e.g., Cash float added'
+                }
                 className={`w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 ${theme.accentRing}`}
               />
             </div>
@@ -211,6 +262,34 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
             </button>
           </div>
         </form>
+
+        {/* Shop & Employee Expenses Breakdown */}
+        <section
+          aria-label={t.banking.expenseBreakdownTitle}
+          className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-3`}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <h2 className={`font-display text-sm font-bold ${theme.headingText}`}>
+              {t.banking.expenseBreakdownTitle}
+            </h2>
+            <span className="font-display text-sm font-bold text-[#8C3B3B] tabular-nums">
+              {formatAmount(pulse.totalExpensesUsd, state.currency)}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {expenseCategoriesOrder.map((cat) => (
+              <div
+                key={cat}
+                className={`border ${theme.cardBorder} ${theme.subtleCardBg} rounded-md p-3`}
+              >
+                <div className="text-xs font-medium text-slate-600">{categoryLabels[cat]}</div>
+                <div className="font-display text-base font-bold text-slate-900 tabular-nums mt-1">
+                  {formatAmount(pulse.expensesByCategory[cat], state.currency)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Register History */}
         <section className={`bg-white border ${theme.cardBorder} rounded-lg overflow-hidden`}>
@@ -307,30 +386,43 @@ export function BankingPage({ state, onRecordEntry, t }: BankingPageProps) {
                     </td>
                   </tr>
                 ) : (
-                  visibleTransactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-slate-50/80">
-                      <td className="px-4 py-3 text-xs text-slate-600 tabular-nums whitespace-nowrap">{tx.date}</td>
-                      <td className="px-4 py-3 text-sm font-medium text-slate-800">{tx.accountName}</td>
-                      <td className="px-4 py-3 text-sm text-slate-700">{tx.description}</td>
-                      <td className="px-4 py-3 text-sm font-semibold tabular-nums text-end whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1 ${
-                            tx.amountUsd >= 0 ? 'text-[#2E6B52]' : 'text-[#8C3B3B]'
-                          }`}
-                        >
-                          {tx.amountUsd >= 0 ? (
-                            <ArrowDownLeft size={13} aria-hidden="true" />
-                          ) : (
-                            <ArrowUpRight size={13} aria-hidden="true" />
-                          )}
-                          <span>
-                            {tx.amountUsd >= 0 ? '+' : '-'}
-                            {formatAmount(Math.abs(tx.amountUsd), state.currency)}
+                  visibleTransactions.map((tx) => {
+                    const expCat = tx.type === 'expense' ? inferExpenseCategory(tx) : null;
+                    return (
+                      <tr key={tx.id} className="hover:bg-slate-50/80">
+                        <td className="px-4 py-3 text-xs text-slate-600 tabular-nums whitespace-nowrap">{tx.date}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-slate-800">{tx.accountName}</td>
+                        <td className="px-4 py-3 text-sm text-slate-700">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span>{tx.description}</span>
+                            {expCat && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-slate-200 bg-slate-100 text-slate-700 text-[11px] font-semibold">
+                                <Tag size={10} aria-hidden="true" />
+                                <span>{categoryLabels[expCat]}</span>
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm font-semibold tabular-nums text-end whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 ${
+                              tx.amountUsd >= 0 ? 'text-[#2E6B52]' : 'text-[#8C3B3B]'
+                            }`}
+                          >
+                            {tx.amountUsd >= 0 ? (
+                              <ArrowDownLeft size={13} aria-hidden="true" />
+                            ) : (
+                              <ArrowUpRight size={13} aria-hidden="true" />
+                            )}
+                            <span>
+                              {tx.amountUsd >= 0 ? '+' : '-'}
+                              {formatAmount(Math.abs(tx.amountUsd), state.currency)}
+                            </span>
                           </span>
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

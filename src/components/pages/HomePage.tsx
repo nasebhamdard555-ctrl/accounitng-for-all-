@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart3,
+  BookOpen,
   Building2,
   Coins,
   FilePlus2,
@@ -10,6 +11,8 @@ import {
   Package,
   Receipt,
   RefreshCw,
+  Smartphone,
+  TrendingUp,
   UserPlus,
   Users,
   Wallet,
@@ -18,6 +21,7 @@ import type { TranslationDict } from '../../i18n/translations';
 import type { AccountingState, AppLanguage, AppPage, CurrencyCode } from '../../types/accounting';
 import {
   computeAccountingSummary,
+  computeDailyBusinessPulse,
   computeOutstandingLoansReport,
   formatAmount,
 } from '../../utils/accountingEngine';
@@ -53,10 +57,18 @@ export function HomePage({
   const repTheme = pages.reports;
 
   const summary = computeAccountingSummary(state);
+  const pulse = computeDailyBusinessPulse(state);
   const outstandingLoans = computeOutstandingLoansReport(state);
   const unpaidInvoicesCount = state.invoices.filter((inv) => inv.status === 'unpaid').length;
   const unpaidBillsCount = state.bills.filter((b) => b.status === 'unpaid').length;
-  const lowStockCount = state.products.filter((p) => p.stockQty <= 2).length;
+  const lowStockCount = state.products.filter((p) => p.stockQty <= (p.reorderLevel ?? 2)).length;
+  const otherExpensesUsd = Number(
+    (
+      pulse.expensesByCategory.utilities_internet +
+      pulse.expensesByCategory.transport +
+      pulse.expensesByCategory.other
+    ).toFixed(2)
+  );
 
   return (
     <div className={`flex-1 ${theme.canvasBg} overflow-y-auto`}>
@@ -195,6 +207,170 @@ export function HomePage({
               {formatAmount(summary.netProfitUsd, state.currency)}
             </p>
           </button>
+        </section>
+
+        {/* Daily Business & Market Trust Pulse */}
+        <section
+          aria-label={t.home.dailyPulseTitle}
+          className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <div className="flex items-center gap-2">
+                <TrendingUp size={18} className={theme.accentText} aria-hidden="true" />
+                <h2 className={`font-display text-base font-bold ${theme.headingText}`}>
+                  {t.home.dailyPulseTitle}
+                </h2>
+              </div>
+              <p className="text-xs text-slate-600 mt-0.5">{t.home.dailyPulseSubtitle}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onNavigate('customers')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} text-xs font-semibold ${custTheme.headingText} hover:brightness-[0.97] transition-all`}
+              >
+                <BookOpen size={13} aria-hidden="true" />
+                <span>{t.home.openLedgerBtn}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('inventory')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border ${invTheme.cardBorder} ${invTheme.subtleCardBg} text-xs font-semibold ${invTheme.headingText} hover:brightness-[0.97] transition-all`}
+              >
+                <Smartphone size={13} aria-hidden="true" />
+                <span>{t.home.openImeiLookupBtn}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Money in Market (Customer Loans) */}
+            <div className={`border ${custTheme.cardBorder} ${custTheme.subtleCardBg} rounded-lg p-4 flex flex-col justify-between gap-3`}>
+              <div>
+                <p className={`text-xs font-bold ${custTheme.headingText}`}>
+                  {t.home.marketLoansCard}
+                </p>
+                <p className="font-display text-xl font-bold text-[#8A5A2B] tabular-nums mt-1">
+                  {formatAmount(pulse.totalMarketLoansUsd, state.currency)}
+                </p>
+                <p className="text-xs text-slate-600 mt-1 tabular-nums">
+                  {pulse.marketLoanCustomerCount} {t.home.marketLoansHolders}
+                  {pulse.overdueLoansCount > 0 ? ` · ${pulse.overdueLoansCount} ${t.reports.deadlineOverdueLabel}` : ''}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onNavigate('customers', 'payment')}
+                className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-white ${custTheme.accentBg} ${custTheme.accentHover} transition-colors`}
+              >
+                <Wallet size={13} aria-hidden="true" />
+                <span>{t.home.collectLoanBtn}</span>
+              </button>
+            </div>
+
+            {/* Owed to Suppliers */}
+            <div className={`border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} rounded-lg p-4 flex flex-col justify-between gap-3`}>
+              <div>
+                <p className={`text-xs font-bold ${vendTheme.headingText}`}>
+                  {t.home.supplierDebtCard}
+                </p>
+                <p className={`font-display text-xl font-bold ${vendTheme.accentText} tabular-nums mt-1`}>
+                  {formatAmount(pulse.totalOwedToSuppliersUsd, state.currency)}
+                </p>
+                <p className="text-xs text-slate-600 mt-1 tabular-nums">
+                  {pulse.unpaidBillsCount} {t.home.unpaidBillsAlert}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onNavigate('vendors')}
+                className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-white ${vendTheme.accentBg} ${vendTheme.accentHover} transition-colors`}
+              >
+                <Receipt size={13} aria-hidden="true" />
+                <span>{t.home.paySupplierBtn}</span>
+              </button>
+            </div>
+
+            {/* Shop & Employee Expenses */}
+            <div className={`border ${bankTheme.cardBorder} ${bankTheme.subtleCardBg} rounded-lg p-4 flex flex-col justify-between gap-3`}>
+              <div>
+                <p className={`text-xs font-bold ${bankTheme.headingText}`}>
+                  {t.home.shopEmployeeExpensesCard}
+                </p>
+                <div className="flex items-baseline justify-between gap-2 mt-1">
+                  <span className="font-display text-xl font-bold text-[#8C3B3B] tabular-nums">
+                    {formatAmount(pulse.todayExpensesUsd, state.currency)}
+                  </span>
+                  <span className="text-[11px] font-semibold text-slate-600 tabular-nums">
+                    {t.home.todayLabel} ({t.home.allTimeLabel}: {formatAmount(pulse.totalExpensesUsd, state.currency)})
+                  </span>
+                </div>
+                <div className="mt-2 space-y-0.5 text-[11px] text-slate-700 tabular-nums">
+                  <div className="flex justify-between">
+                    <span>{t.home.employeeSalaryShort}:</span>
+                    <strong>{formatAmount(pulse.expensesByCategory.employee_salary, state.currency)}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t.home.shopRentShort}:</span>
+                    <strong>{formatAmount(pulse.expensesByCategory.shop_rent, state.currency)}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t.home.otherShopShort}:</span>
+                    <strong>{formatAmount(otherExpensesUsd, state.currency)}</strong>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => onNavigate('banking')}
+                className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-white ${bankTheme.accentBg} ${bankTheme.accentHover} transition-colors`}
+              >
+                <Building2 size={13} aria-hidden="true" />
+                <span>{t.home.recordExpenseBtn}</span>
+              </button>
+            </div>
+
+            {/* Today's Sales & Gross Profit */}
+            <div className={`border ${repTheme.cardBorder} ${repTheme.subtleCardBg} rounded-lg p-4 flex flex-col justify-between gap-3`}>
+              <div>
+                <p className={`text-xs font-bold ${repTheme.headingText}`}>
+                  {t.home.todaySalesProfitCard}
+                </p>
+                <p className="font-display text-xl font-bold text-slate-900 tabular-nums mt-1">
+                  {formatAmount(pulse.todaySalesUsd, state.currency)}
+                </p>
+                <div className="mt-2 space-y-0.5 text-[11px] text-slate-700 tabular-nums">
+                  <div className="flex justify-between">
+                    <span>{t.home.todayCashShort}:</span>
+                    <strong className="text-[#2E6B52]">
+                      {formatAmount(pulse.todayCashCollectedUsd, state.currency)}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t.home.todayLoansShort}:</span>
+                    <strong className="text-[#8A5A2B]">
+                      {formatAmount(pulse.todayLoansGivenUsd, state.currency)}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t.home.todayGrossProfitShort}:</span>
+                    <strong className={repTheme.accentText}>
+                      {formatAmount(pulse.todayGrossProfitUsd, state.currency)} ({pulse.todayGrossMarginPct}%)
+                    </strong>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => onNavigate('reports')}
+                className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-white ${repTheme.accentBg} ${repTheme.accentHover} transition-colors`}
+              >
+                <BarChart3 size={13} aria-hidden="true" />
+                <span>{t.home.qaViewReports}</span>
+              </button>
+            </div>
+          </div>
         </section>
 
         {/* Quick Actions Strip */}

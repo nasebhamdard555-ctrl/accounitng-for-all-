@@ -1,4 +1,5 @@
 import type { AccountingState, SalesInvoice } from '../types/accounting';
+import { getInvoicePaidUsd, getInvoiceRemainingUsd } from './accountingEngine';
 
 export interface PrintableInvoiceData {
   invoiceNumber: string;
@@ -31,14 +32,16 @@ export function buildPrintableInvoiceData(
     : undefined;
 
   const subtotalUsd = Number((invoice.unitPriceUsd * invoice.quantity).toFixed(2));
-  const totalUsd = Number(invoice.totalUsd.toFixed(2));
-  const isPaid = invoice.status === 'paid';
+  const returnedUsd = Number((invoice.returnedUsd ?? 0).toFixed(2));
+  const totalUsd = Math.max(0, Number((invoice.totalUsd - returnedUsd).toFixed(2)));
+  const amountPaidUsd = getInvoicePaidUsd(invoice);
+  const balanceDueUsd = getInvoiceRemainingUsd(invoice);
 
   return {
     invoiceNumber: invoice.invoiceNumber,
     issueDate: invoice.date,
     dueDate: invoice.dueDate,
-    status: invoice.status,
+    status: balanceDueUsd <= 0 ? 'paid' : 'unpaid',
     currency: state.currency,
     customerName: customer?.name || invoice.customerName,
     customerPhone: customer?.phone || '—',
@@ -49,8 +52,8 @@ export function buildPrintableInvoiceData(
     unitPriceUsd: invoice.unitPriceUsd,
     subtotalUsd,
     totalUsd,
-    amountPaidUsd: isPaid ? totalUsd : 0,
-    balanceDueUsd: isPaid ? 0 : totalUsd,
+    amountPaidUsd,
+    balanceDueUsd,
     paidAccountName: paidAccount?.name,
   };
 }

@@ -52,6 +52,10 @@ export interface InventoryDevice {
   status: InventoryStatus;
   sold_receipt?: string;
   sold_at?: string;
+  supplierName?: string;
+  purchaseInvoiceRef?: string;
+  purchaseDate?: string;
+  costUsd?: number;
 }
 
 export interface ResolutionLogEntry {
