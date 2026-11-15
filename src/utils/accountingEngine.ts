@@ -1,5 +1,6 @@
 import type {
   AccountingState,
+  BalanceSheetSnapshot,
   BankTransaction,
   CurrencyCode,
   Customer,
@@ -649,6 +650,8 @@ export function addProductItem(
     priceUsd: number;
     stockQty: number;
     brand?: string;
+    originCountry?: string;
+    variantRegion?: string;
     reorderLevel?: number;
   }
 ): { ok: true; state: AccountingState; product: ProductItem } | { ok: false; error: string } {
@@ -672,6 +675,8 @@ export function addProductItem(
     sku: input.sku.trim() || `SKU-${100 + state.products.length}`,
     name,
     brand: input.brand?.trim() || undefined,
+    originCountry: input.originCountry?.trim() || undefined,
+    variantRegion: input.variantRegion?.trim() || undefined,
     category: input.category.trim() || 'Electronics',
     costUsd: Number.isFinite(costUsd) && costUsd >= 0 ? Number(costUsd.toFixed(2)) : 0,
     priceUsd: Number(priceUsd.toFixed(2)),
@@ -1444,6 +1449,10 @@ export function computeProfitAndLossStatement(state: AccountingState): ProfitAnd
   const closingInventoryRetailUsd = Number(
     state.products.reduce((sum, p) => sum + p.priceUsd * p.stockQty, 0).toFixed(2)
   );
+  const openingStockUsd = Math.max(
+    0,
+    Number((closingInventoryCostUsd + costOfGoodsSoldUsd - totalPurchasesUsd).toFixed(2))
+  );
 
   const expensesBreakdown: Record<ExpenseCategory, number> = {
     shop_rent: 0,
@@ -1467,6 +1476,7 @@ export function computeProfitAndLossStatement(state: AccountingState): ProfitAnd
     netSalesUsd > 0 ? Number(((netProfitUsd / netSalesUsd) * 100).toFixed(1)) : 0;
 
   return {
+    openingStockUsd,
     grossSalesUsd,
     salesReturnsUsd,
     netSalesUsd,
@@ -1480,6 +1490,46 @@ export function computeProfitAndLossStatement(state: AccountingState): ProfitAnd
     totalShopExpensesUsd,
     netProfitUsd,
     netMarginPct,
+  };
+}
+
+export function computeBalanceSheetSnapshot(state: AccountingState): BalanceSheetSnapshot {
+  const cashUsd = Number(
+    state.bankAccounts
+      .filter((a) => a.accountType === 'cash')
+      .reduce((sum, a) => sum + a.balanceUsd, 0)
+      .toFixed(2)
+  );
+  const bankUsd = Number(
+    state.bankAccounts
+      .filter((a) => a.accountType === 'bank')
+      .reduce((sum, a) => sum + a.balanceUsd, 0)
+      .toFixed(2)
+  );
+  const receivablesUsd = Number(
+    state.invoices.reduce((sum, inv) => sum + getInvoiceRemainingUsd(inv), 0).toFixed(2)
+  );
+  const closingStockUsd = Number(
+    state.products.reduce((sum, p) => sum + p.costUsd * p.stockQty, 0).toFixed(2)
+  );
+  const totalAssetsUsd = Number(
+    (cashUsd + bankUsd + receivablesUsd + closingStockUsd).toFixed(2)
+  );
+  const payablesUsd = Number(
+    state.bills.reduce((sum, b) => sum + getBillRemainingUsd(b), 0).toFixed(2)
+  );
+  const netEquityUsd = Number((totalAssetsUsd - payablesUsd).toFixed(2));
+  const totalLiabilitiesEquityUsd = Number((payablesUsd + netEquityUsd).toFixed(2));
+
+  return {
+    cashUsd,
+    bankUsd,
+    receivablesUsd,
+    closingStockUsd,
+    totalAssetsUsd,
+    payablesUsd,
+    netEquityUsd,
+    totalLiabilitiesEquityUsd,
   };
 }
 

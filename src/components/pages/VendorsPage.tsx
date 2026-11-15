@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BookOpen, CheckCircle2, FileText, Receipt, RotateCcw, Search, Users } from 'lucide-react';
 import { PartyLedgerModal } from '../PartyLedgerModal';
 import type { TranslationDict } from '../../i18n/translations';
-import type { AccountingState, VendorBill } from '../../types/accounting';
+import type { AccountingState, ShopProfile, VendorBill } from '../../types/accounting';
 import {
   formatAmount,
   getBillPaidUsd,
@@ -27,6 +27,7 @@ interface VendorsPageProps {
     ok: boolean;
     error?: string;
   };
+  shopProfile?: ShopProfile;
   t: TranslationDict;
 }
 
@@ -36,6 +37,7 @@ export function VendorsPage({
   onPayBill,
   onReturnBill,
   onAddVendor,
+  shopProfile,
   t,
 }: VendorsPageProps) {
   const theme = usePageTheme('vendors');
@@ -552,6 +554,7 @@ export function VendorsPage({
           kind="vendor"
           partyId={ledgerVendorId}
           state={state}
+          shopProfile={shopProfile}
           onClose={() => setLedgerVendorId(null)}
           t={t}
         />

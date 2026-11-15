@@ -12,15 +12,25 @@ import {
   MessageSquare,
   Phone,
   Printer,
+  Scale,
+  Search,
   TrendingUp,
+  UserCheck,
   Wallet,
   X,
 } from 'lucide-react';
 import type { TranslationDict } from '../../i18n/translations';
-import type { AccountingState, AppLanguage, ReportPeriod } from '../../types/accounting';
+import type {
+  AccountingState,
+  AppLanguage,
+  ReportPeriod,
+  ShopProfile,
+} from '../../types/accounting';
 import {
   computeAccountingSummary,
+  computeBalanceSheetSnapshot,
   computeOutstandingLoansReport,
+  computePartyLedger,
   computePeriodSalesReport,
   computeProfitAndLossStatement,
   formatAmount,
@@ -53,6 +63,7 @@ function loadRemindedIds(): Record<string, boolean> {
 
 interface ReportsPageProps {
   state: AccountingState;
+  shopProfile?: ShopProfile;
   language: AppLanguage;
   onCollectPayment?: () => void;
   onPayBills?: () => void;
@@ -68,13 +79,29 @@ interface ReminderTarget {
   amountUsd: number;
 }
 
-export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }: ReportsPageProps) {
+export function ReportsPage({
+  state,
+  shopProfile,
+  language,
+  onCollectPayment,
+  onPayBills,
+  t,
+}: ReportsPageProps) {
   const theme = usePageTheme('reports');
   const [period, setPeriod] = useState<ReportPeriod>('day');
   const [anchorDate, setAnchorDate] = useState<string>(() =>
     new Date().toISOString().slice(0, 10)
   );
   const [loanFilter, setLoanFilter] = useState<'all' | 'due_soon' | 'overdue'>('all');
+  const [pnlView, setPnlView] = useState<'simple' | 't_account' | 'balance_sheet'>('simple');
+  const [ledgerSearch, setLedgerSearch] = useState('');
+  const [ledgerGroupFilter, setLedgerGroupFilter] = useState<'all' | 'customer' | 'vendor'>('all');
+  const [selectedParty, setSelectedParty] = useState<{
+    kind: 'customer' | 'vendor';
+    partyId: string;
+  } | null>(() =>
+    state.customers[0] ? { kind: 'customer', partyId: state.customers[0].id } : null
+  );
   const [reminderTarget, setReminderTarget] = useState<ReminderTarget | null>(null);
   const [reminderMessage, setReminderMessage] = useState('');
   const [copiedReminder, setCopiedReminder] = useState(false);
@@ -86,6 +113,7 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
 
   const summary = computeAccountingSummary(state);
   const pnl = computeProfitAndLossStatement(state);
+  const balanceSheet = computeBalanceSheetSnapshot(state);
   const periodReport = computePeriodSalesReport(state, period, anchorDate);
   const outstandingLoans = computeOutstandingLoansReport(state);
   const overdueCustomerCount = outstandingLoans.customers.filter((c) => c.hasOverdue).length;
@@ -95,6 +123,45 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
     if (loanFilter === 'overdue') return cust.hasOverdue;
     return true;
   });
+
+  const normalizedLedgerQuery = ledgerSearch.trim().toLowerCase();
+  const allLedgerParties = [
+    ...state.customers.map((c) => ({
+      kind: 'customer' as const,
+      id: c.id,
+      name: c.name,
+      phone: c.phone,
+      city: c.city,
+      balanceUsd: c.balanceUsd,
+    })),
+    ...state.vendors.map((v) => ({
+      kind: 'vendor' as const,
+      id: v.id,
+      name: v.name,
+      phone: v.phone,
+      city: v.city,
+      balanceUsd: v.balanceUsd,
+    })),
+  ].filter((party) => {
+    if (ledgerGroupFilter !== 'all' && party.kind !== ledgerGroupFilter) return false;
+    if (!normalizedLedgerQuery) return true;
+    return (
+      party.name.toLowerCase().includes(normalizedLedgerQuery) ||
+      party.phone.toLowerCase().includes(normalizedLedgerQuery) ||
+      party.city.toLowerCase().includes(normalizedLedgerQuery)
+    );
+  });
+
+  const activeMasterParty =
+    allLedgerParties.find(
+      (p) => selectedParty && p.kind === selectedParty.kind && p.id === selectedParty.partyId
+    ) ??
+    allLedgerParties[0] ??
+    null;
+
+  const activeMasterLedger = activeMasterParty
+    ? computePartyLedger(state, activeMasterParty.kind, activeMasterParty.id)
+    : null;
 
   const openReminderModal = (target: ReminderTarget) => {
     setReminderTarget(target);
@@ -838,107 +905,341 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
           )}
         </section>
 
-        {/* Marg-Style Trading & Profit & Loss Statement + Stock Valuation */}
+        {/* Marg-Style Trading & Profit & Loss Statement + Balance Sheet + Stock Valuation */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <section className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}>
-            <div className="flex items-start justify-between gap-2">
+          <section
+            className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4 ${
+              pnlView !== 'simple' ? 'lg:col-span-2' : ''
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div>
                 <h2 className={`font-display text-base font-bold ${theme.headingText} flex items-center gap-2`}>
-                  <TrendingUp size={16} className={theme.accentText} aria-hidden="true" />
-                  <span>{t.reports.tradingPnlTitle}</span>
+                  {pnlView === 'balance_sheet' ? (
+                    <Scale size={16} className={theme.accentText} aria-hidden="true" />
+                  ) : (
+                    <TrendingUp size={16} className={theme.accentText} aria-hidden="true" />
+                  )}
+                  <span>
+                    {pnlView === 'balance_sheet' ? t.reports.pnlViewBalanceSheet : t.reports.tradingPnlTitle}
+                  </span>
                 </h2>
                 <p className="text-xs text-slate-600 mt-0.5">{t.reports.tradingPnlSubtitle}</p>
               </div>
-              <span className="px-2 py-0.5 rounded border border-emerald-200 bg-emerald-50 text-[#1E4234] text-xs font-bold tabular-nums">
-                {t.inventory.marginLabel}: {pnl.grossMarginPct}%
-              </span>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div
+                  role="group"
+                  aria-label={t.reports.tradingPnlTitle}
+                  className={`inline-flex rounded-md border ${theme.navActiveBorder} bg-slate-50 p-0.5 print:hidden`}
+                >
+                  {(
+                    [
+                      { id: 'simple', label: t.reports.pnlViewSimple },
+                      { id: 't_account', label: t.reports.pnlViewTAccount },
+                      { id: 'balance_sheet', label: t.reports.pnlViewBalanceSheet },
+                    ] as const
+                  ).map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setPnlView(mode.id)}
+                      aria-pressed={pnlView === mode.id}
+                      className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap ${
+                        pnlView === mode.id
+                          ? `${theme.accentBg} text-white`
+                          : 'text-slate-700 hover:bg-white'
+                      }`}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
+                </div>
+                <span className="px-2 py-0.5 rounded border border-emerald-200 bg-emerald-50 text-[#1E4234] text-xs font-bold tabular-nums">
+                  {t.inventory.marginLabel}: {pnl.grossMarginPct}%
+                </span>
+              </div>
             </div>
 
-            <div className="divide-y divide-slate-100 text-sm">
-              <div className="py-2 flex items-center justify-between">
-                <span className="text-slate-700">{t.reports.grossSalesLabel}</span>
-                <span className="font-semibold text-slate-900 tabular-nums">
-                  {formatAmount(pnl.grossSalesUsd, state.currency)}
-                </span>
-              </div>
-              <div className="py-2 flex items-center justify-between">
-                <span className="text-slate-700">{t.reports.salesReturnsLabel}</span>
-                <span className="font-semibold text-[#8C3B3B] tabular-nums">
-                  - {formatAmount(pnl.salesReturnsUsd, state.currency)}
-                </span>
-              </div>
-              <div className="py-2 flex items-center justify-between">
-                <span className="font-medium text-slate-900">{t.reports.netSalesLabel}</span>
-                <span className="font-semibold text-slate-900 tabular-nums">
-                  {formatAmount(pnl.netSalesUsd, state.currency)}
-                </span>
-              </div>
-              <div className="py-2 flex items-center justify-between">
-                <span className="text-slate-700">{t.reports.cogsLabel}</span>
-                <span className="font-semibold text-slate-700 tabular-nums">
-                  - {formatAmount(pnl.costOfGoodsSoldUsd, state.currency)}
-                </span>
-              </div>
-              <div className={`py-2.5 flex items-center justify-between ${theme.subtleCardBg} px-2 rounded`}>
-                <span className="font-bold text-slate-900">{t.reports.grossProfitLabel}</span>
-                <span className="font-bold text-[#2E6B52] tabular-nums">
-                  {formatAmount(pnl.grossProfitUsd, state.currency)} ({pnl.grossMarginPct}%)
-                </span>
-              </div>
-              <div className="py-2 flex items-center justify-between">
-                <span className="text-slate-700">{t.reports.totalPurchasesLabel}</span>
-                <span className="font-semibold text-slate-700 tabular-nums">
-                  {formatAmount(pnl.totalPurchasesUsd, state.currency)}
-                </span>
-              </div>
-              <div className="py-2 space-y-1">
-                <div className="flex items-center justify-between font-medium text-slate-800">
-                  <span>{t.reports.expensesBreakdownLabel}</span>
-                  <span className="font-semibold text-[#8C3B3B] tabular-nums">
-                    - {formatAmount(pnl.totalShopExpensesUsd, state.currency)}
+            {pnlView === 'simple' && (
+              <div className="divide-y divide-slate-100 text-sm">
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-slate-700">{t.reports.grossSalesLabel}</span>
+                  <span className="font-semibold text-slate-900 tabular-nums">
+                    {formatAmount(pnl.grossSalesUsd, state.currency)}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 ps-3 text-xs text-slate-600 tabular-nums">
-                  <div className="flex justify-between">
-                    <span>{t.banking.catEmployeeSalary}</span>
-                    <span>{formatAmount(pnl.expensesBreakdown.employee_salary, state.currency)}</span>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-slate-700">{t.reports.salesReturnsLabel}</span>
+                  <span className="font-semibold text-[#8C3B3B] tabular-nums">
+                    - {formatAmount(pnl.salesReturnsUsd, state.currency)}
+                  </span>
+                </div>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="font-medium text-slate-900">{t.reports.netSalesLabel}</span>
+                  <span className="font-semibold text-slate-900 tabular-nums">
+                    {formatAmount(pnl.netSalesUsd, state.currency)}
+                  </span>
+                </div>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-slate-700">{t.reports.cogsLabel}</span>
+                  <span className="font-semibold text-slate-700 tabular-nums">
+                    - {formatAmount(pnl.costOfGoodsSoldUsd, state.currency)}
+                  </span>
+                </div>
+                <div className={`py-2.5 flex items-center justify-between ${theme.subtleCardBg} px-2 rounded`}>
+                  <span className="font-bold text-slate-900">{t.reports.grossProfitLabel}</span>
+                  <span className="font-bold text-[#2E6B52] tabular-nums">
+                    {formatAmount(pnl.grossProfitUsd, state.currency)} ({pnl.grossMarginPct}%)
+                  </span>
+                </div>
+                <div className="py-2 flex items-center justify-between text-xs text-slate-600">
+                  <span>{t.reports.openingStockLabel} / {t.reports.closingStockLabel}</span>
+                  <span className="font-mono tabular-nums">
+                    {formatAmount(pnl.openingStockUsd, state.currency)} / {formatAmount(pnl.closingInventoryCostUsd, state.currency)}
+                  </span>
+                </div>
+                <div className="py-2 flex items-center justify-between">
+                  <span className="text-slate-700">{t.reports.totalPurchasesLabel}</span>
+                  <span className="font-semibold text-slate-700 tabular-nums">
+                    {formatAmount(pnl.totalPurchasesUsd, state.currency)}
+                  </span>
+                </div>
+                <div className="py-2 space-y-1">
+                  <div className="flex items-center justify-between font-medium text-slate-800">
+                    <span>{t.reports.expensesBreakdownLabel}</span>
+                    <span className="font-semibold text-[#8C3B3B] tabular-nums">
+                      - {formatAmount(pnl.totalShopExpensesUsd, state.currency)}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>{t.banking.catShopRent}</span>
-                    <span>{formatAmount(pnl.expensesBreakdown.shop_rent, state.currency)}</span>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 ps-3 text-xs text-slate-600 tabular-nums">
+                    <div className="flex justify-between">
+                      <span>{t.banking.catEmployeeSalary}</span>
+                      <span>{formatAmount(pnl.expensesBreakdown.employee_salary, state.currency)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{t.banking.catShopRent}</span>
+                      <span>{formatAmount(pnl.expensesBreakdown.shop_rent, state.currency)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{t.banking.catUtilities}</span>
+                      <span>{formatAmount(pnl.expensesBreakdown.utilities_internet, state.currency)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{t.banking.catTransport} / {t.banking.catOther}</span>
+                      <span>
+                        {formatAmount(
+                          pnl.expensesBreakdown.transport + pnl.expensesBreakdown.other,
+                          state.currency
+                        )}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>{t.banking.catUtilities}</span>
-                    <span>{formatAmount(pnl.expensesBreakdown.utilities_internet, state.currency)}</span>
+                </div>
+                <div className="pt-3 flex items-center justify-between text-base font-bold">
+                  <span className="text-slate-900">
+                    {t.reports.netProfitLabel} ({t.reports.netMarginLabel}: {pnl.netMarginPct}%)
+                  </span>
+                  <span
+                    className={`tabular-nums ${
+                      pnl.netProfitUsd >= 0 ? theme.accentText : 'text-[#8C3B3B]'
+                    }`}
+                  >
+                    {formatAmount(pnl.netProfitUsd, state.currency)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {pnlView === 't_account' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border border-slate-200 rounded-md overflow-hidden">
+                  <div className="px-4 py-2.5 bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-800">
+                    {t.reports.drSideLabel}
                   </div>
-                  <div className="flex justify-between">
-                    <span>{t.banking.catTransport} / {t.banking.catOther}</span>
-                    <span>
+                  <div className="divide-y divide-slate-100 text-sm">
+                    <div className="px-4 py-2.5 flex justify-between gap-2">
+                      <span className="text-slate-700">{t.reports.openingStockLabel}</span>
+                      <span className="font-semibold text-slate-900 tabular-nums">
+                        {formatAmount(pnl.openingStockUsd, state.currency)}
+                      </span>
+                    </div>
+                    <div className="px-4 py-2.5 flex justify-between gap-2">
+                      <span className="text-slate-700">{t.reports.totalPurchasesLabel}</span>
+                      <span className="font-semibold text-slate-900 tabular-nums">
+                        {formatAmount(pnl.totalPurchasesUsd, state.currency)}
+                      </span>
+                    </div>
+                    <div className="px-4 py-2.5 flex justify-between gap-2 bg-[#EDF5F1]/70">
+                      <span className="font-semibold text-[#1E4234]">
+                        {t.reports.grossProfitLabel} ({pnl.grossMarginPct}%)
+                      </span>
+                      <span className="font-bold text-[#2E6B52] tabular-nums">
+                        {formatAmount(pnl.grossProfitUsd, state.currency)}
+                      </span>
+                    </div>
+                    <div className="px-4 py-2.5 flex justify-between gap-2">
+                      <span className="text-slate-700">{t.reports.expensesBreakdownLabel}</span>
+                      <span className="font-semibold text-[#8C3B3B] tabular-nums">
+                        {formatAmount(pnl.totalShopExpensesUsd, state.currency)}
+                      </span>
+                    </div>
+                    <div className="px-4 py-2 bg-slate-50/70 text-xs text-slate-600 space-y-1 tabular-nums">
+                      <div className="flex justify-between">
+                        <span>• {t.banking.catEmployeeSalary}</span>
+                        <span>{formatAmount(pnl.expensesBreakdown.employee_salary, state.currency)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>• {t.banking.catShopRent}</span>
+                        <span>{formatAmount(pnl.expensesBreakdown.shop_rent, state.currency)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>• {t.banking.catUtilities} / {t.banking.catTransport}</span>
+                        <span>
+                          {formatAmount(
+                            pnl.expensesBreakdown.utilities_internet +
+                              pnl.expensesBreakdown.transport +
+                              pnl.expensesBreakdown.other,
+                            state.currency
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={`px-4 py-3 flex justify-between gap-2 font-bold ${theme.subtleCardBg}`}>
+                      <span className="text-slate-900">
+                        {t.reports.netProfitLabel} ({pnl.netMarginPct}%)
+                      </span>
+                      <span
+                        className={`tabular-nums ${
+                          pnl.netProfitUsd >= 0 ? theme.accentText : 'text-[#8C3B3B]'
+                        }`}
+                      >
+                        {formatAmount(pnl.netProfitUsd, state.currency)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border border-slate-200 rounded-md overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="px-4 py-2.5 bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-800">
+                      {t.reports.crSideLabel}
+                    </div>
+                    <div className="divide-y divide-slate-100 text-sm">
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.grossSalesLabel}</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">
+                          {formatAmount(pnl.grossSalesUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.salesReturnsLabel}</span>
+                        <span className="font-semibold text-[#8C3B3B] tabular-nums">
+                          - {formatAmount(pnl.salesReturnsUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="px-4 py-2.5 flex justify-between gap-2 bg-slate-50/70">
+                        <span className="font-semibold text-slate-900">{t.reports.netSalesLabel}</span>
+                        <span className="font-bold text-slate-900 tabular-nums">
+                          {formatAmount(pnl.netSalesUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.closingStockLabel}</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">
+                          {formatAmount(pnl.closingInventoryCostUsd, state.currency)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`px-4 py-3 border-t border-slate-200 flex justify-between text-sm font-bold ${theme.subtleCardBg}`}>
+                    <span className="text-slate-900">{t.common.total} (Cr.)</span>
+                    <span className="tabular-nums text-slate-900">
                       {formatAmount(
-                        pnl.expensesBreakdown.transport + pnl.expensesBreakdown.other,
+                        Number((pnl.netSalesUsd + pnl.closingInventoryCostUsd).toFixed(2)),
                         state.currency
                       )}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="pt-3 flex items-center justify-between text-base font-bold">
-                <span className="text-slate-900">
-                  {t.reports.netProfitLabel} ({t.reports.netMarginLabel}: {pnl.netMarginPct}%)
-                </span>
-                <span
-                  className={`tabular-nums ${
-                    pnl.netProfitUsd >= 0 ? theme.accentText : 'text-[#8C3B3B]'
-                  }`}
-                >
-                  {formatAmount(pnl.netProfitUsd, state.currency)}
-                </span>
+            )}
+
+            {pnlView === 'balance_sheet' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border border-slate-200 rounded-md overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="px-4 py-2.5 bg-[#EDF5F1] border-b border-[#CFE0D8] text-xs font-bold text-[#1E4234]">
+                      {t.reports.assetsHeading}
+                    </div>
+                    <div className="divide-y divide-slate-100 text-sm">
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.cashInHandLabel}</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">
+                          {formatAmount(balanceSheet.cashUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.bankBalanceLabel}</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">
+                          {formatAmount(balanceSheet.bankUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.customerReceivablesLabel}</span>
+                        <span className="font-semibold text-[#8A5A2B] tabular-nums">
+                          {formatAmount(balanceSheet.receivablesUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.closingStockLabel}</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">
+                          {formatAmount(balanceSheet.closingStockUsd, state.currency)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 border-t border-[#CFE0D8] bg-[#EDF5F1] flex justify-between text-sm font-bold">
+                    <span className="text-[#1E4234]">{t.reports.totalAssetsLabel}</span>
+                    <span className="text-[#2E6B52] tabular-nums">
+                      {formatAmount(balanceSheet.totalAssetsUsd, state.currency)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border border-slate-200 rounded-md overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="px-4 py-2.5 bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-800">
+                      {t.reports.liabilitiesEquityHeading}
+                    </div>
+                    <div className="divide-y divide-slate-100 text-sm">
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.supplierPayablesLabel}</span>
+                        <span className="font-semibold text-[#8C3B3B] tabular-nums">
+                          {formatAmount(balanceSheet.payablesUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="px-4 py-2.5 flex justify-between gap-2">
+                        <span className="text-slate-700">{t.reports.netEquityLabel}</span>
+                        <span className={`font-semibold tabular-nums ${theme.accentText}`}>
+                          {formatAmount(balanceSheet.netEquityUsd, state.currency)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`px-4 py-3 border-t border-slate-200 flex justify-between text-sm font-bold ${theme.subtleCardBg}`}>
+                    <span className="text-slate-900">{t.reports.totalLiabilitiesLabel}</span>
+                    <span className="text-slate-900 tabular-nums">
+                      {formatAmount(balanceSheet.totalLiabilitiesEquityUsd, state.currency)}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </section>
 
           {/* Cash Flow & Inventory Valuation */}
-          <div className="space-y-6">
+          <div className={`space-y-6 ${pnlView !== 'simple' ? 'lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6 space-y-0' : ''}`}>
             <section className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}>
               <h2 className={`font-display text-base font-bold ${theme.headingText}`}>
                 {t.reports.profitLossTitle}
@@ -991,86 +1292,241 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
           </div>
         </div>
 
-        {/* Party Ledger Explorer (Ledger A/c) */}
+        {/* Master-Detail Party Ledger Explorer (Ledger A/c) */}
         <section
           aria-label={t.reports.partyLedgerExplorerTitle}
           className={`bg-white border ${theme.cardBorder} rounded-lg overflow-hidden`}
         >
-          <div className={`px-5 py-4 border-b ${theme.cardBorder} ${theme.subtleCardBg}`}>
-            <h2 className={`font-display text-base font-bold ${theme.headingText} flex items-center gap-2`}>
-              <BookOpen size={16} className={theme.accentText} aria-hidden="true" />
-              <span>{t.reports.partyLedgerExplorerTitle}</span>
-            </h2>
-            <p className="text-xs text-slate-600 mt-0.5">{t.reports.partyLedgerExplorerSubtitle}</p>
-          </div>
-
-          <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div
+            className={`px-5 py-4 border-b ${theme.cardBorder} ${theme.subtleCardBg} flex flex-col lg:flex-row lg:items-center justify-between gap-3`}
+          >
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2.5">
-                {t.reports.customerLedgersLabel} ({state.customers.length})
-              </h3>
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-md">
-                {state.customers.map((cust) => (
-                  <div key={cust.id} className="px-3.5 py-2.5 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-slate-900 truncate">{cust.name}</div>
-                      <div className="text-xs text-slate-500 font-mono">
-                        {cust.phone} · {cust.city}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span
-                        className={`text-xs font-bold tabular-nums ${
-                          cust.balanceUsd > 0 ? 'text-[#8A5A2B]' : 'text-[#2E6B52]'
-                        }`}
-                      >
-                        {formatAmount(cust.balanceUsd, state.currency)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setLedgerTarget({ kind: 'customer', partyId: cust.id })}
-                        className={`px-2.5 py-1 text-xs font-semibold rounded border ${theme.navActiveBorder} bg-white hover:bg-slate-50 ${theme.headingText} print:hidden`}
-                      >
-                        {t.reports.openStatementBtn}
-                      </button>
-                    </div>
-                  </div>
+              <h2 className={`font-display text-base font-bold ${theme.headingText} flex items-center gap-2`}>
+                <BookOpen size={16} className={theme.accentText} aria-hidden="true" />
+                <span>{t.reports.partyLedgerExplorerTitle}</span>
+              </h2>
+              <p className="text-xs text-slate-600 mt-0.5">{t.reports.partyLedgerExplorerSubtitle}</p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 print:hidden">
+              <div className="relative">
+                <Search
+                  size={14}
+                  className="text-slate-400 absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                  aria-hidden="true"
+                />
+                <input
+                  type="search"
+                  value={ledgerSearch}
+                  onChange={(e) => setLedgerSearch(e.target.value)}
+                  placeholder={t.reports.ledgerSearchPlaceholder}
+                  aria-label={t.reports.ledgerSearchPlaceholder}
+                  className={`bg-white border border-slate-300 rounded-md ps-8 pe-3 py-1.5 text-xs text-slate-900 w-full sm:w-64 focus:outline-none focus:ring-2 ${theme.accentRing}`}
+                />
+              </div>
+              <div
+                role="group"
+                aria-label={t.reports.partyLedgerExplorerTitle}
+                className="flex items-center gap-1 bg-white border border-slate-200 p-0.5 rounded-md"
+              >
+                {(
+                  [
+                    { id: 'all', label: t.reports.filterAllParties },
+                    { id: 'customer', label: t.reports.filterCustomersOnly },
+                    { id: 'vendor', label: t.reports.filterSuppliersOnly },
+                  ] as const
+                ).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setLedgerGroupFilter(tab.id)}
+                    aria-pressed={ledgerGroupFilter === tab.id}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors whitespace-nowrap ${
+                      ledgerGroupFilter === tab.id
+                        ? `${theme.accentBg} text-white`
+                        : 'text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
                 ))}
               </div>
             </div>
+          </div>
 
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2.5">
-                {t.reports.supplierLedgersLabel} ({state.vendors.length})
-              </h3>
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-md">
-                {state.vendors.map((vend) => (
-                  <div key={vend.id} className="px-3.5 py-2.5 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-slate-900 truncate">{vend.name}</div>
-                      <div className="text-xs text-slate-500 font-mono">
-                        {vend.phone} · {vend.city}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span
-                        className={`text-xs font-bold tabular-nums ${
-                          vend.balanceUsd > 0 ? 'text-[#8C3B3B]' : 'text-[#2E6B52]'
+          <div className="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Left Master Directory List */}
+            <div className="lg:col-span-5 border border-slate-200 rounded-md overflow-hidden">
+              <div className="max-h-96 overflow-y-auto divide-y divide-slate-100">
+                {allLedgerParties.length === 0 ? (
+                  <p className="p-4 text-sm text-slate-500">{t.common.noRecords}</p>
+                ) : (
+                  allLedgerParties.map((party) => {
+                    const isSelected =
+                      activeMasterParty &&
+                      activeMasterParty.kind === party.kind &&
+                      activeMasterParty.id === party.id;
+                    return (
+                      <button
+                        key={`${party.kind}-${party.id}`}
+                        type="button"
+                        onClick={() => setSelectedParty({ kind: party.kind, partyId: party.id })}
+                        aria-pressed={Boolean(isSelected)}
+                        className={`w-full px-3.5 py-2.5 flex items-center justify-between gap-2 text-start transition-colors ${
+                          isSelected ? `${theme.subtleCardBg} border-s-4 border-slate-800` : 'hover:bg-slate-50'
                         }`}
                       >
-                        {formatAmount(vend.balanceUsd, state.currency)}
-                      </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-sm font-semibold text-slate-900 truncate">
+                              {party.name}
+                            </span>
+                            <span
+                              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border ${
+                                party.kind === 'customer'
+                                  ? 'border-amber-200 bg-amber-50 text-amber-900'
+                                  : 'border-rose-200 bg-rose-50 text-rose-900'
+                              }`}
+                            >
+                              {party.kind === 'customer'
+                                ? t.reports.customerLedgersLabel
+                                : t.reports.supplierLedgersLabel}
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-500 font-mono mt-0.5">
+                            {party.phone} · {party.city}
+                          </div>
+                        </div>
+                        <span
+                          className={`text-xs font-bold tabular-nums shrink-0 ${
+                            party.balanceUsd > 0
+                              ? party.kind === 'customer'
+                                ? 'text-[#8A5A2B]'
+                                : 'text-[#8C3B3B]'
+                              : 'text-[#2E6B52]'
+                          }`}
+                        >
+                          {formatAmount(party.balanceUsd, state.currency)}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Right Selected Account Detail Status Card */}
+            <div className={`lg:col-span-7 border ${theme.cardBorder} rounded-md p-4 bg-slate-50/50 flex flex-col justify-between gap-4`}>
+              {!activeMasterParty || !activeMasterLedger ? (
+                <p className="text-sm text-slate-500">{t.common.noRecords}</p>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
+                      <div>
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                          <UserCheck size={14} className={theme.accentText} aria-hidden="true" />
+                          <span>{t.reports.selectedPartyStatusTitle}</span>
+                        </div>
+                        <h3 className="font-display text-lg font-bold text-slate-900 mt-0.5">
+                          {activeMasterLedger.partyName}
+                        </h3>
+                        <p className="text-xs text-slate-600 font-mono">
+                          {activeMasterLedger.kind === 'customer'
+                            ? t.reports.accountGroupCustomer
+                            : t.reports.accountGroupSupplier}{' '}
+                          · {activeMasterLedger.partyPhone} · {activeMasterLedger.partyCity}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="bg-white border border-slate-200 rounded-md p-3">
+                        <span className="text-xs text-slate-500 block">{t.ledger.totalDebitLabel}</span>
+                        <span className="font-display text-base font-bold text-slate-900 tabular-nums mt-0.5 block">
+                          {formatAmount(activeMasterLedger.totalDebitUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="bg-white border border-slate-200 rounded-md p-3">
+                        <span className="text-xs text-slate-500 block">{t.ledger.totalCreditLabel}</span>
+                        <span className="font-display text-base font-bold text-[#2E6B52] tabular-nums mt-0.5 block">
+                          {formatAmount(activeMasterLedger.totalCreditUsd, state.currency)}
+                        </span>
+                      </div>
+                      <div className="bg-white border border-slate-200 rounded-md p-3">
+                        <span className="text-xs text-slate-500 block">{t.ledger.closingBalanceLabel}</span>
+                        <span
+                          className={`font-display text-base font-bold tabular-nums mt-0.5 block ${
+                            activeMasterLedger.closingBalanceUsd > 0
+                              ? 'text-[#8A5A2B]'
+                              : 'text-[#2E6B52]'
+                          }`}
+                        >
+                          {formatAmount(activeMasterLedger.closingBalanceUsd, state.currency)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {activeMasterLedger.entries.length > 0 && (
+                      <div className="bg-white border border-slate-200 rounded-md overflow-hidden">
+                        <div className="divide-y divide-slate-100 text-xs">
+                          {activeMasterLedger.entries.slice(-3).map((entry) => (
+                            <div key={entry.id} className="px-3 py-2 flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <span className="font-mono font-semibold text-slate-900">
+                                  {entry.refNumber}
+                                </span>{' '}
+                                <span className="text-slate-600 truncate">· {entry.description}</span>
+                              </div>
+                              <span className="font-mono font-semibold text-slate-800 tabular-nums shrink-0">
+                                {formatAmount(entry.runningBalanceUsd, state.currency)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-200 print:hidden">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setLedgerTarget({
+                          kind: activeMasterParty.kind,
+                          partyId: activeMasterParty.id,
+                        })
+                      }
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white rounded-md ${theme.accentBg} ${theme.accentHover} transition-colors`}
+                    >
+                      <BookOpen size={13} aria-hidden="true" />
+                      <span>{t.reports.openStatementBtn}</span>
+                    </button>
+
+                    {activeMasterParty.kind === 'customer' && onCollectPayment && (
                       <button
                         type="button"
-                        onClick={() => setLedgerTarget({ kind: 'vendor', partyId: vend.id })}
-                        className={`px-2.5 py-1 text-xs font-semibold rounded border ${theme.navActiveBorder} bg-white hover:bg-slate-50 ${theme.headingText} print:hidden`}
+                        onClick={onCollectPayment}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors"
                       >
-                        {t.reports.openStatementBtn}
+                        <Wallet size={13} className={theme.accentText} aria-hidden="true" />
+                        <span>{t.reports.collectPaymentBtn}</span>
                       </button>
-                    </div>
+                    )}
+
+                    {activeMasterParty.kind === 'vendor' && onPayBills && (
+                      <button
+                        type="button"
+                        onClick={onPayBills}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors"
+                      >
+                        <Wallet size={13} className={theme.accentText} aria-hidden="true" />
+                        <span>{t.reports.payVendorBillBtn}</span>
+                      </button>
+                    )}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -1286,6 +1742,7 @@ export function ReportsPage({ state, language, onCollectPayment, onPayBills, t }
           kind={ledgerTarget.kind}
           partyId={ledgerTarget.partyId}
           state={state}
+          shopProfile={shopProfile}
           onClose={() => setLedgerTarget(null)}
           t={t}
         />

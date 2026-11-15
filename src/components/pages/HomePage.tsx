@@ -5,12 +5,18 @@ import {
   BookOpen,
   Building2,
   Coins,
+  Edit3,
   FilePlus2,
   FileText,
   Globe,
+  Mail,
+  MapPin,
   Package,
+  Phone,
   Receipt,
   RefreshCw,
+  RotateCcw,
+  Scale,
   Smartphone,
   TrendingUp,
   UserPlus,
@@ -18,7 +24,13 @@ import {
   Wallet,
 } from 'lucide-react';
 import type { TranslationDict } from '../../i18n/translations';
-import type { AccountingState, AppLanguage, AppPage, CurrencyCode } from '../../types/accounting';
+import type {
+  AccountingState,
+  AppLanguage,
+  AppPage,
+  CurrencyCode,
+  ShopProfile,
+} from '../../types/accounting';
 import {
   computeAccountingSummary,
   computeDailyBusinessPulse,
@@ -29,6 +41,7 @@ import { useThemeContext } from '../../utils/ThemeContext';
 
 interface HomePageProps {
   state: AccountingState;
+  shopProfile: ShopProfile;
   language: AppLanguage;
   onChangeLanguage: (lang: AppLanguage) => void;
   onChangeCurrency: (curr: CurrencyCode) => void;
@@ -39,6 +52,7 @@ interface HomePageProps {
 
 export function HomePage({
   state,
+  shopProfile,
   language,
   onChangeLanguage,
   onChangeCurrency,
@@ -207,6 +221,154 @@ export function HomePage({
               {formatAmount(summary.netProfitUsd, state.currency)}
             </p>
           </button>
+        </section>
+
+        {/* Executive Shop & CEO Leadership Spotlight + Quick Accounting Desk */}
+        <section
+          aria-label={t.home.ceoSpotlightTitle}
+          className={`bg-white border ${theme.cardBorder} rounded-lg p-5 space-y-4`}
+        >
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 min-w-0 flex-1">
+              {shopProfile.showCeoSpotlight && (
+                <img
+                  src={shopProfile.ceoPhotoUrl}
+                  alt={`${shopProfile.ceoName} — ${shopProfile.shopName}`}
+                  className="w-28 h-36 sm:w-32 sm:h-40 object-cover object-top rounded-md border border-slate-200 shrink-0 shadow-xs"
+                />
+              )}
+
+              <div className="min-w-0 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded border ${theme.cardBorder} ${theme.subtleCardBg} text-[11px] font-bold ${theme.headingText}`}
+                  >
+                    {t.home.ceoSpotlightBadge}
+                  </span>
+                  <span className="text-xs font-mono text-slate-500">
+                    {t.home.fiscalYearLabel}: {shopProfile.fiscalPeriod}
+                  </span>
+                </div>
+
+                <div>
+                  <h2 className={`font-display text-lg sm:text-xl font-bold ${theme.headingText}`}>
+                    {shopProfile.shopName}
+                  </h2>
+                  {shopProfile.showCeoSpotlight && (
+                    <p className="text-sm font-semibold text-slate-800 mt-0.5">
+                      {shopProfile.ceoName} ·{' '}
+                      <span className="font-normal text-slate-600">{shopProfile.ceoTitle}</span>
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs text-slate-700 pt-1">
+                  <div className="flex items-start gap-1.5 sm:col-span-2">
+                    <MapPin size={14} className={`${theme.accentText} shrink-0 mt-0.5`} aria-hidden="true" />
+                    <span>
+                      <strong className="text-slate-800">{t.home.regOfficeLabel}:</strong>{' '}
+                      {shopProfile.address}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Phone size={13} className={`${theme.accentText} shrink-0`} aria-hidden="true" />
+                    <span className="font-mono">
+                      <strong className="font-sans text-slate-800">{t.home.regMobileLabel}:</strong>{' '}
+                      {shopProfile.phone}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Mail size={13} className={`${theme.accentText} shrink-0`} aria-hidden="true" />
+                    <span className="truncate font-mono">
+                      <strong className="font-sans text-slate-800">{t.home.regEmailLabel}:</strong>{' '}
+                      {shopProfile.email}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex sm:flex-row md:flex-col items-start md:items-end justify-between gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => onNavigate('settings')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border ${theme.navActiveBorder} ${theme.subtleCardBg} hover:brightness-[0.97] text-xs font-semibold ${theme.headingText} transition-all whitespace-nowrap`}
+              >
+                <Edit3 size={13} aria-hidden="true" />
+                <span>{t.home.editShopProfileBtn}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-slate-100">
+            <div className="text-xs font-bold text-slate-700 mb-2.5">{t.home.shortcutBarTitle}</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+              <button
+                type="button"
+                onClick={() => onNavigate('customers', 'invoice')}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-md border ${custTheme.cardBorder} ${custTheme.subtleCardBg} hover:brightness-[0.96] text-xs font-semibold ${custTheme.headingText} transition-all text-center`}
+              >
+                <FilePlus2 size={13} className={custTheme.accentText} aria-hidden="true" />
+                <span className="truncate">{t.home.shortcutSale}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('vendors')}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-md border ${vendTheme.cardBorder} ${vendTheme.subtleCardBg} hover:brightness-[0.96] text-xs font-semibold ${vendTheme.headingText} transition-all text-center`}
+              >
+                <FileText size={13} className={vendTheme.accentText} aria-hidden="true" />
+                <span className="truncate">{t.home.shortcutPurchase}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('customers')}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-md border ${custTheme.cardBorder} bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 transition-all text-center`}
+              >
+                <RotateCcw size={13} className={custTheme.accentText} aria-hidden="true" />
+                <span className="truncate">{t.home.shortcutSr}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('vendors')}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-md border ${vendTheme.cardBorder} bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 transition-all text-center`}
+              >
+                <RotateCcw size={13} className={vendTheme.accentText} aria-hidden="true" />
+                <span className="truncate">{t.home.shortcutPr}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('reports')}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-md border ${repTheme.cardBorder} ${repTheme.subtleCardBg} hover:brightness-[0.96] text-xs font-semibold ${repTheme.headingText} transition-all text-center`}
+              >
+                <BookOpen size={13} className={repTheme.accentText} aria-hidden="true" />
+                <span className="truncate">{t.home.shortcutLedger}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('reports')}
+                className="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-md border border-amber-300 bg-amber-50 hover:bg-amber-100/80 text-xs font-semibold text-amber-950 transition-all text-center"
+              >
+                <AlertTriangle size={13} className="text-amber-700" aria-hidden="true" />
+                <span className="truncate">{t.home.shortcutOutstanding}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('inventory')}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-md border ${invTheme.cardBorder} ${invTheme.subtleCardBg} hover:brightness-[0.96] text-xs font-semibold ${invTheme.headingText} transition-all text-center`}
+              >
+                <Smartphone size={13} className={invTheme.accentText} aria-hidden="true" />
+                <span className="truncate">{t.home.shortcutStock}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('reports')}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-md border ${repTheme.cardBorder} bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 transition-all text-center`}
+              >
+                <Scale size={13} className={repTheme.accentText} aria-hidden="true" />
+                <span className="truncate">{t.home.shortcutPnl}</span>
+              </button>
+            </div>
+          </div>
         </section>
 
         {/* Daily Business & Market Trust Pulse */}

@@ -77,6 +77,18 @@ export interface VendorBill {
   returnNote?: string;
 }
 
+export interface ShopProfile {
+  shopName: string;
+  ceoName: string;
+  ceoTitle: string;
+  address: string;
+  phone: string;
+  email: string;
+  fiscalPeriod: string;
+  ceoPhotoUrl: string;
+  showCeoSpotlight: boolean;
+}
+
 export interface ProductItem {
   id: string;
   sku: string;
@@ -86,6 +98,8 @@ export interface ProductItem {
   priceUsd: number;
   stockQty: number;
   brand?: string;
+  originCountry?: string;
+  variantRegion?: string;
   reorderLevel?: number;
 }
 
@@ -254,6 +268,7 @@ export interface PartyLedgerStatement {
 }
 
 export interface ProfitAndLossStatement {
+  openingStockUsd: number;
   grossSalesUsd: number;
   salesReturnsUsd: number;
   netSalesUsd: number;
@@ -267,6 +282,17 @@ export interface ProfitAndLossStatement {
   totalShopExpensesUsd: number;
   netProfitUsd: number;
   netMarginPct: number;
+}
+
+export interface BalanceSheetSnapshot {
+  cashUsd: number;
+  bankUsd: number;
+  receivablesUsd: number;
+  closingStockUsd: number;
+  totalAssetsUsd: number;
+  payablesUsd: number;
+  netEquityUsd: number;
+  totalLiabilitiesEquityUsd: number;
 }
 
 export interface ProductRegisterEntry {

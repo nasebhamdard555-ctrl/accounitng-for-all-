@@ -18,6 +18,8 @@ interface InventoryPageProps {
     name: string;
     sku: string;
     brand?: string;
+    originCountry?: string;
+    variantRegion?: string;
     category: string;
     costUsd: number;
     priceUsd: number;
@@ -46,6 +48,8 @@ export function InventoryPage({
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
   const [brand, setBrand] = useState('');
+  const [originCountry, setOriginCountry] = useState('');
+  const [variantRegion, setVariantRegion] = useState('');
   const [category, setCategory] = useState('Smartphones');
   const [costUsd, setCostUsd] = useState('500');
   const [priceUsd, setPriceUsd] = useState('620');
@@ -53,6 +57,9 @@ export function InventoryPage({
   const [reorderLevel, setReorderLevel] = useState('2');
   const [stockFilter, setStockFilter] = useState<'all' | 'low'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState<string>(
+    () => state.products[0]?.id || ''
+  );
   const [inspector, setInspector] = useState<{
     productId: string;
     tab: 'imei' | 'register';
@@ -75,10 +82,15 @@ export function InventoryPage({
       p.name.toLowerCase().includes(normalizedSearch) ||
       p.sku.toLowerCase().includes(normalizedSearch) ||
       (p.brand || '').toLowerCase().includes(normalizedSearch) ||
+      (p.originCountry || '').toLowerCase().includes(normalizedSearch) ||
+      (p.variantRegion || '').toLowerCase().includes(normalizedSearch) ||
       p.category.toLowerCase().includes(normalizedSearch) ||
       imeiMatch
     );
   });
+
+  const activeSelectedProduct =
+    visibleProducts.find((p) => p.id === selectedProductId) || visibleProducts[0] || null;
 
   const inspectedProduct = inspector
     ? state.products.find((p) => p.id === inspector.productId) || null
@@ -90,6 +102,8 @@ export function InventoryPage({
       name,
       sku,
       brand,
+      originCountry,
+      variantRegion,
       category,
       costUsd: Number(costUsd),
       priceUsd: Number(priceUsd),
@@ -103,6 +117,8 @@ export function InventoryPage({
     setName('');
     setSku('');
     setBrand('');
+    setOriginCountry('');
+    setVariantRegion('');
     setFeedback({ type: 'ok', text: `${t.inventory.addItemBtn} — ${t.common.save}` });
   };
 
@@ -260,7 +276,7 @@ export function InventoryPage({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <label htmlFor="prod-brand" className="text-xs font-semibold text-slate-700">
                   {t.inventory.brandLabel}:
@@ -270,8 +286,36 @@ export function InventoryPage({
                   type="text"
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
-                  placeholder="Apple / Samsung / Xiaomi"
-                  className="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 w-40"
+                  placeholder="Apple / Samsung"
+                  className="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 w-32"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label htmlFor="prod-origin" className="text-xs font-semibold text-slate-700">
+                  {t.inventory.originCountryLabel}:
+                </label>
+                <input
+                  id="prod-origin"
+                  type="text"
+                  value={originCountry}
+                  onChange={(e) => setOriginCountry(e.target.value)}
+                  placeholder="USA / Vietnam"
+                  className="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 w-28"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label htmlFor="prod-region" className="text-xs font-semibold text-slate-700">
+                  {t.inventory.variantRegionLabel}:
+                </label>
+                <input
+                  id="prod-region"
+                  type="text"
+                  value={variantRegion}
+                  onChange={(e) => setVariantRegion(e.target.value)}
+                  placeholder="ZA / CH/A / LL/A"
+                  className="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs font-mono text-slate-900 w-28"
                 />
               </div>
 
@@ -284,7 +328,7 @@ export function InventoryPage({
                   type="text"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 w-32"
+                  className="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 w-28"
                 />
               </div>
 
@@ -389,15 +433,38 @@ export function InventoryPage({
                 ) : (
                   visibleProducts.map((prod) => {
                     const marginPct = computeMarginPct(prod.costUsd, prod.priceUsd);
+                    const marginAmtUsd = Math.max(0, Number((prod.priceUsd - prod.costUsd).toFixed(2)));
                     const low = isLowStock(prod);
                     const skuImeiCount = inventoryDevices.filter((d) => d.sku === prod.sku).length;
+                    const isSelected = activeSelectedProduct?.id === prod.id;
                     return (
-                      <tr key={prod.id} className="hover:bg-slate-50/80">
+                      <tr
+                        key={prod.id}
+                        onClick={() => setSelectedProductId(prod.id)}
+                        className={`cursor-pointer transition-colors ${
+                          isSelected ? `${theme.subtleCardBg}` : 'hover:bg-slate-50/80'
+                        }`}
+                      >
                         <td className="px-4 py-3 font-mono text-xs text-slate-600 whitespace-nowrap">{prod.sku}</td>
                         <td className="px-4 py-3">
-                          <div className="text-sm font-medium text-slate-900">{prod.name}</div>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedProductId(prod.id)}
+                            aria-pressed={isSelected}
+                            className="text-start text-sm font-semibold text-slate-900 hover:underline flex flex-wrap items-center gap-1.5"
+                          >
+                            <span>{prod.name}</span>
+                            {prod.variantRegion && (
+                              <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 rounded border border-slate-300 bg-white text-slate-700">
+                                ({prod.variantRegion})
+                              </span>
+                            )}
+                          </button>
                           <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 mt-0.5">
                             {prod.brand && <span className="font-semibold text-slate-700">{prod.brand}</span>}
+                            {prod.originCountry && (
+                              <span className="text-slate-600">· {prod.originCountry}</span>
+                            )}
                             <span>{prod.category}</span>
                             <span className="font-mono text-[11px] text-slate-500">
                               {t.inventory.reorderLevelLabel}: {prod.reorderLevel ?? 2}
@@ -410,8 +477,13 @@ export function InventoryPage({
                         <td className="px-4 py-3 text-sm font-semibold text-slate-900 tabular-nums text-end whitespace-nowrap">
                           {formatAmount(prod.priceUsd, state.currency)}
                         </td>
-                        <td className="px-4 py-3 text-xs font-bold text-[#2E6B52] tabular-nums text-end whitespace-nowrap">
-                          +{marginPct}%
+                        <td className="px-4 py-3 text-end tabular-nums whitespace-nowrap">
+                          <div className="text-xs font-bold text-[#2E6B52]">
+                            +{formatAmount(marginAmtUsd, state.currency)}
+                          </div>
+                          <div className="text-[11px] font-semibold text-[#2E6B52]/90">
+                            (+{marginPct}%)
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-sm font-semibold tabular-nums text-end whitespace-nowrap">
                           <span className={low ? 'text-[#8C3B3B]' : theme.accentText}>
@@ -421,7 +493,10 @@ export function InventoryPage({
                             ({low ? t.inventory.lowStock : t.inventory.inStock})
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-end whitespace-nowrap">
+                        <td
+                          className="px-4 py-3 text-end whitespace-nowrap"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="inline-flex items-center gap-1.5">
                             <button
                               type="button"
@@ -467,6 +542,92 @@ export function InventoryPage({
               </tbody>
             </table>
           </div>
+
+          {/* Video 2 Closing Stock Status Detail Strip */}
+          {activeSelectedProduct && (
+            <div
+              aria-label={t.inventory.selectedItemTitle}
+              className={`border-t ${theme.navActiveBorder} ${theme.subtleCardBg} px-5 py-4 space-y-3`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className={`text-xs font-bold uppercase tracking-wide ${theme.headingText}`}>
+                    {t.inventory.selectedItemTitle}
+                  </span>
+                  <div className="font-display text-sm font-bold text-slate-900 mt-0.5 flex flex-wrap items-center gap-2">
+                    <span>{activeSelectedProduct.name}</span>
+                    {activeSelectedProduct.variantRegion && (
+                      <span className="font-mono text-xs px-1.5 py-0.5 rounded border border-slate-300 bg-white text-slate-800">
+                        ({activeSelectedProduct.variantRegion})
+                      </span>
+                    )}
+                    <span className="font-mono text-xs text-slate-500">
+                      {activeSelectedProduct.sku}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setInspector({ productId: activeSelectedProduct.id, tab: 'imei' })}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white rounded-md ${theme.accentBg} ${theme.accentHover} transition-colors`}
+                  >
+                    <Smartphone size={13} aria-hidden="true" />
+                    <span>{t.inventory.imeiDetailBtn}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInspector({ productId: activeSelectedProduct.id, tab: 'register' })}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 transition-colors"
+                  >
+                    <ClipboardList size={13} aria-hidden="true" />
+                    <span>{t.inventory.registerBtn}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2 border-t border-slate-200/80 text-xs">
+                <div>
+                  <span className="text-slate-500 block">{t.inventory.originCountryLabel}</span>
+                  <strong className="text-slate-900">
+                    {activeSelectedProduct.originCountry || '—'}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">{t.inventory.brandLabel}</span>
+                  <strong className="text-slate-900">
+                    {activeSelectedProduct.brand || '—'}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">{t.inventory.purchaseRateLabel}</span>
+                  <strong className="font-mono text-slate-900 tabular-nums">
+                    {formatAmount(activeSelectedProduct.costUsd, state.currency)}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">{t.common.price}</span>
+                  <strong className="font-mono text-slate-900 tabular-nums">
+                    {formatAmount(activeSelectedProduct.priceUsd, state.currency)}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">{t.inventory.marginLabel}</span>
+                  <strong className="font-mono text-[#2E6B52] tabular-nums">
+                    +{formatAmount(Math.max(0, activeSelectedProduct.priceUsd - activeSelectedProduct.costUsd), state.currency)} (+{computeMarginPct(activeSelectedProduct.costUsd, activeSelectedProduct.priceUsd)}%)
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">{t.inventory.reorderLevelLabel}</span>
+                  <strong className="font-mono text-slate-900 tabular-nums">
+                    {activeSelectedProduct.stockQty} / min {activeSelectedProduct.reorderLevel ?? 2}
+                  </strong>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500">{t.inventory.clickRowHint}</p>
+            </div>
+          )}
         </section>
       </div>
 

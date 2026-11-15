@@ -664,6 +664,76 @@ export const GUIDE_TOPICS: GuideTopic[] = [
       ],
     },
   },
+  {
+    id: 'balance_sheet_t_account',
+    targetPage: 'reports',
+    keywords: [
+      'balance sheet', 't-account', 't account', 'assets', 'liabilities', 'capital', 'equity', 'opening stock', 'closing stock',
+      'بیلانس', 'شتمني', 'سرمایه', 'دارایی', 'ترازنامه', 'بدهکار', 'بستانکار',
+    ],
+    label: {
+      en: 'How to Read T-Account P&L, Balance Sheet & Debit/Credit Ledgers',
+      ps: 'څنګه د T-Account ګټه و تاوان، بیلانس شیټ او کھاتہ وګورو؟',
+      fa: 'چطور حساب T سود و زیان، بیلانس‌شیت و صورت‌حساب بدهکار/بستانکار را ببینیم؟',
+    },
+    summary: {
+      en: 'Switch between simple lists and classic two-column T-Account format (Debit vs Credit) in Profit & Loss, Balance Sheet (Assets vs Liabilities), and any Customer/Supplier Ledger.',
+      ps: 'په ګټه او تاوان، بیلانس شیټ (شتمني او پورونه) او د هر پیرودونکي په کھاتہ کې له ساده لست څخه دوه ستنه T-Account بڼې ته واړوئ.',
+      fa: 'در گزارش سود و زیان، بیلانس‌شیت (دارایی‌ها و بدهی‌ها) و صورت‌حساب مشتریان/فروشندگان بین نمای ساده و نمای دو ستونه کلاسیک (T-Account) جابه‌جا شوید.',
+    },
+    steps: {
+      en: [
+        'Open "Business Reports" and find "Trading & Profit & Loss Statement (P&L)".',
+        'Click "T-Account (Dr. | Cr.)" to compare Opening Stock, Purchases & Expenses against Sales & Closing Stock, or click "Balance Sheet" to see Cash, Bank, Customer Loans & Stock vs Supplier Debt & Capital.',
+        'In "Party Ledger Explorer", click any customer or supplier to see live balances, then open their statement and switch to "T-Account (Debit | Credit)" anytime.',
+      ],
+      ps: [
+        '"د سوداګرۍ راپورونه" ته لاړ شئ او "د ګټې او تاوان بشپړ راپور" وګورئ.',
+        'د "T-Account (جمع | خرڅ)" تڼۍ کلیک کړئ یا "بیلانس شیټ" خلاص کړئ ترڅو ټوله شتمني او پورونه وګورئ.',
+        'په "د پیرودونکو کھاتہ" کې پر هر نوم کلیک وکړئ او په بیان کې T-حساب انتخاب کړئ.',
+      ],
+      fa: [
+        'به صفحه «گزارش‌های مالی» بروید و بخش «صورت‌حساب کامل مفاد و ضرر» را ببینید.',
+        'روی «حساب T (بدهکار | بستانکار)» یا «بیلانس شیت» کلیک کنید تا دارایی‌ها، طلبات، گدام، بدهی و سرمایه را یکجا ببینید.',
+        'در «مرورگر صورت‌حساب طرفین» با کلیک روی هر شخص وضعیت لحظه‌ای را ببینید و در صورت‌حساب گزینه نمای T را فعال کنید.',
+      ],
+    },
+  },
+  {
+    id: 'shop_profile_ceo',
+    targetPage: 'settings',
+    keywords: [
+      'ceo', 'shop', 'profile', 'photo', 'address', 'logo', 'office', 'ayan', 'name', 'fiscal',
+      'پروفایل', 'عکس', 'پته', 'دوکان', 'فروشگاه', 'تصویر', 'آدرس', 'مدیریت',
+    ],
+    label: {
+      en: 'How to Update Shop Name, Kabul Address, Fiscal Year & CEO Spotlight',
+      ps: 'څنګه د دوکان نوم، پته، مالي کال او د CEO کارت تنظیم کړو؟',
+      fa: 'چطور نام دوکان، آدرس، دوره مالی و کارت مدیر (CEO) را تنظیم کنیم؟',
+    },
+    summary: {
+      en: 'Customize your shop name, Gul Bahar Center / office address, phone, email, fiscal year, and CEO leadership spotlight shown on the Home page and printed invoices.',
+      ps: 'د خپل دوکان نوم، پته، تلیفون، مالي کال او د CEO کارت بدل کړئ ترڅو پر اصلي پاڼه او چاپ شویو بلونو ښکاره شي.',
+      fa: 'نام فروشگاه، آدرس دفتر، شماره تماس، دوره مالی و کارت معرفی مدیریت (CEO) را برای صفحه اصلی و بل‌های چاپی تنظیم کنید.',
+    },
+    steps: {
+      en: [
+        'Open "Settings" from the left menu (or click "Edit Shop & CEO Profile" on Home).',
+        'Update Shop Name, CEO Name & Title, Address, Mobile, Email, and Fiscal Period.',
+        'Click "Save Shop Profile" — your Home screen and printed official invoices update immediately.',
+      ],
+      ps: [
+        '"تنظیمات" خلاص کړئ (یا په اصلي پاڼه د CEO کارت لاندې سمون کلیک کړئ).',
+        'د دوکان نوم، د CEO نوم، پته، تلیفون، بریښنالیک او مالي دوره ولیکئ.',
+        '"معلومات خوندي کړئ" کلیک کړئ ترڅو پر اصلي پاڼه او چاپ شویو بلونو بدل شي.',
+      ],
+      fa: [
+        'به صفحه «تنظیمات» بروید (یا از صفحه اصلی دکمه ویرایش پروفایل را بزنید).',
+        'نام فروشگاه، نام CEO، آدرس، تلفن، ایمیل و دوره مالی را ویرایش کنید.',
+        'روی «ذخیره پروفایل» کلیک کنید تا در صفحه اصلی و تمام بل‌های چاپی اعمال شود.',
+      ],
+    },
+  },
 ];
 
 const PAGE_TO_TOPIC_ID: Record<AppPage, string> = {
@@ -682,25 +752,25 @@ export const SUGGESTED_QUESTIONS: Record<AppLanguage, string[]> = {
     'How much money is in the market as loans?',
     'How to collect partial loan payment?',
     'How to check 15-digit IMEI & days in stock?',
+    'How to read Balance Sheet & T-Account P&L?',
     'How to view customer ledger statement?',
     'How to record employee salary & shop rent?',
-    'How to return a sold phone (S/R)?',
   ],
   ps: [
     'څومره پیسې په بازار کې پور دي؟',
     'څنګه نیمه یا قسطي پیسې واخلو؟',
     'څنګه د ۱۵ عددي IMEI تفصیل وګورو؟',
+    'څنګه بیلانس شیټ او T-Account وګورو؟',
     'څنګه د پیرودونکي کھاتہ / لیجر وګورو؟',
     'څنګه د کارکوونکو معاش او کرایه ثبت کړو؟',
-    'څنګه د پلور واپسي (S/R) ثبت کړو؟',
   ],
   fa: [
     'چقدر پول ما در بازار قرض است؟',
     'چطور قسطی از مشتری پول بگیریم؟',
     'چطور جزئیات IMEI و روزهای گدام را ببینیم؟',
+    'چطور بیلانس‌شیت و حساب T سود و زیان را ببینیم؟',
     'چطور صورت‌حساب مشتری (Ledger) را چاپ کنیم؟',
     'چطور معاش کارمندان و کرایه دوکان را ثبت کنیم؟',
-    'چطور برگشت از فروش (S/R) بزنیم؟',
   ],
 };
 

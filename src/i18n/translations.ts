@@ -101,6 +101,22 @@ export interface TranslationDict {
     todayGrossProfitShort: string;
     openLedgerBtn: string;
     openImeiLookupBtn: string;
+    ceoSpotlightTitle: string;
+    ceoSpotlightBadge: string;
+    regOfficeLabel: string;
+    regMobileLabel: string;
+    regEmailLabel: string;
+    fiscalYearLabel: string;
+    editShopProfileBtn: string;
+    shortcutBarTitle: string;
+    shortcutSale: string;
+    shortcutPurchase: string;
+    shortcutSr: string;
+    shortcutPr: string;
+    shortcutLedger: string;
+    shortcutOutstanding: string;
+    shortcutStock: string;
+    shortcutPnl: string;
   };
   customers: {
     pageTitle: string;
@@ -214,6 +230,12 @@ export interface TranslationDict {
     imeiSearchPlaceholder: string;
     noImeisFound: string;
     noRegisterEntries: string;
+    originCountryLabel: string;
+    variantRegionLabel: string;
+    selectedItemTitle: string;
+    clickRowHint: string;
+    selectedImeiTitle: string;
+    purchaseRateLabel: string;
   };
   banking: {
     pageTitle: string;
@@ -349,6 +371,29 @@ export interface TranslationDict {
     customerLedgersLabel: string;
     supplierLedgersLabel: string;
     openStatementBtn: string;
+    pnlViewSimple: string;
+    pnlViewTAccount: string;
+    pnlViewBalanceSheet: string;
+    openingStockLabel: string;
+    closingStockLabel: string;
+    drSideLabel: string;
+    crSideLabel: string;
+    assetsHeading: string;
+    liabilitiesEquityHeading: string;
+    cashInHandLabel: string;
+    bankBalanceLabel: string;
+    customerReceivablesLabel: string;
+    supplierPayablesLabel: string;
+    netEquityLabel: string;
+    totalAssetsLabel: string;
+    totalLiabilitiesLabel: string;
+    ledgerSearchPlaceholder: string;
+    filterAllParties: string;
+    filterCustomersOnly: string;
+    filterSuppliersOnly: string;
+    selectedPartyStatusTitle: string;
+    accountGroupCustomer: string;
+    accountGroupSupplier: string;
   };
   ledger: {
     customerLedgerTitle: string;
@@ -368,6 +413,10 @@ export interface TranslationDict {
     typeBill: string;
     typeBillPayment: string;
     typeReturnPr: string;
+    viewRunningBtn: string;
+    viewTAccountBtn: string;
+    tAccountLeftTitle: string;
+    tAccountRightTitle: string;
   };
   guide: {
     title: string;
@@ -406,6 +455,19 @@ export interface TranslationDict {
     preferencesSubtitle: string;
     dataSafetyTitle: string;
     dataSafetyDesc: string;
+    shopProfileTitle: string;
+    shopProfileSubtitle: string;
+    shopNameLabel: string;
+    ceoNameLabel: string;
+    ceoTitleLabel: string;
+    shopAddressLabel: string;
+    shopPhoneLabel: string;
+    shopEmailLabel: string;
+    fiscalPeriodLabel: string;
+    showCeoSpotlightLabel: string;
+    saveProfileBtn: string;
+    profileSavedNotice: string;
+    resetProfileBtn: string;
   };
 }
 
@@ -520,6 +582,22 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       todayGrossProfitShort: 'Gross Profit',
       openLedgerBtn: 'Customer Ledgers',
       openImeiLookupBtn: 'Stock & IMEI Lookup',
+      ceoSpotlightTitle: 'Executive Shop & Leadership Profile',
+      ceoSpotlightBadge: 'Managing Leadership',
+      regOfficeLabel: 'Reg Office',
+      regMobileLabel: 'Reg Mobile',
+      regEmailLabel: 'Reg Email',
+      fiscalYearLabel: 'Fiscal Period',
+      editShopProfileBtn: 'Edit Shop & CEO Profile',
+      shortcutBarTitle: 'Quick Accounting Desk (1-Click Jump)',
+      shortcutSale: 'Sale Invoice',
+      shortcutPurchase: 'Purchase Bill',
+      shortcutSr: 'Sales Return (S/R)',
+      shortcutPr: 'Purchase Return (P/R)',
+      shortcutLedger: 'Ledger A/c',
+      shortcutOutstanding: '48h Loans',
+      shortcutStock: 'Stock & IMEI',
+      shortcutPnl: 'P&L / Balance Sheet',
     },
     customers: {
       pageTitle: 'Customers & Sales Invoices',
@@ -633,6 +711,12 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       imeiSearchPlaceholder: 'Find by IMEI or supplier...',
       noImeisFound: 'No serialized IMEIs logged for this model yet. Add one below.',
       noRegisterEntries: 'No sales or return movements recorded for this item yet.',
+      originCountryLabel: 'Company / Origin',
+      variantRegionLabel: 'Region / Variant',
+      selectedItemTitle: 'Selected Item Status & Quick Actions',
+      clickRowHint: 'Click any row above to inspect region, margin amount, IMEI Detail, or Item Register.',
+      selectedImeiTitle: 'Selected IMEI Unit Inspection',
+      purchaseRateLabel: 'Pur.Rate',
     },
     banking: {
       pageTitle: 'Banking, Cash & Shop Expenses',
@@ -768,6 +852,29 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       customerLedgersLabel: 'Customer Accounts',
       supplierLedgersLabel: 'Supplier Accounts',
       openStatementBtn: 'View Statement',
+      pnlViewSimple: 'Simple Summary',
+      pnlViewTAccount: 'T-Account (Dr. | Cr.)',
+      pnlViewBalanceSheet: 'Balance Sheet',
+      openingStockLabel: 'Opening Stock',
+      closingStockLabel: 'Closing Stock',
+      drSideLabel: 'Dr. (Debit / Costs & Profit)',
+      crSideLabel: 'Cr. (Credit / Sales & Closing Stock)',
+      assetsHeading: 'Assets (Cash, Bank, Loans & Stock)',
+      liabilitiesEquityHeading: 'Liabilities & Owner Capital',
+      cashInHandLabel: 'Cash in Hand (Drawer)',
+      bankBalanceLabel: 'Bank Accounts Balance',
+      customerReceivablesLabel: 'Sundry Debtors (Customer Loans)',
+      supplierPayablesLabel: 'Sundry Creditors (Supplier Bills)',
+      netEquityLabel: 'Owner Capital & Net Equity',
+      totalAssetsLabel: 'Total Assets',
+      totalLiabilitiesLabel: 'Total Liabilities & Capital',
+      ledgerSearchPlaceholder: 'Search customer or supplier by name, city, or phone...',
+      filterAllParties: 'All Ledgers',
+      filterCustomersOnly: 'Sundry Debtors (Customers)',
+      filterSuppliersOnly: 'Sundry Creditors (Suppliers)',
+      selectedPartyStatusTitle: 'Selected Ledger A/c Status',
+      accountGroupCustomer: 'Sundry Debtors (Customer)',
+      accountGroupSupplier: 'Sundry Creditors (Supplier)',
     },
     ledger: {
       customerLedgerTitle: 'Customer Ledger Statement (Ledger A/c)',
@@ -787,6 +894,10 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       typeBill: 'Purchase Bill',
       typeBillPayment: 'Bill Payment',
       typeReturnPr: 'Purchase Return (P/R)',
+      viewRunningBtn: 'Running Balance',
+      viewTAccountBtn: 'T-Account (Debit | Credit)',
+      tAccountLeftTitle: 'Debit Entries (Dr.)',
+      tAccountRightTitle: 'Credit Entries (Cr.)',
     },
     guide: {
       title: 'Easy Step-by-Step Assistant',
@@ -842,6 +953,19 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       preferencesSubtitle: 'Switch display language (English, Pashto, Dari) and ledger currency anytime.',
       dataSafetyTitle: 'Backup & Data Management',
       dataSafetyDesc: 'Download a complete JSON copy of your ledgers or restore from a saved backup file.',
+      shopProfileTitle: 'Shop & CEO Leadership Profile',
+      shopProfileSubtitle: 'Shown on your Home spotlight card and printed official invoices & ledger statements.',
+      shopNameLabel: 'Shop / Business Name',
+      ceoNameLabel: 'CEO / Owner Name',
+      ceoTitleLabel: 'Leadership Title',
+      shopAddressLabel: 'Shop Address',
+      shopPhoneLabel: 'Registered Mobile',
+      shopEmailLabel: 'Registered Email',
+      fiscalPeriodLabel: 'Fiscal Period',
+      showCeoSpotlightLabel: 'Show CEO Spotlight Card on Home Screen',
+      saveProfileBtn: 'Save Shop Profile',
+      profileSavedNotice: 'Shop & CEO profile updated.',
+      resetProfileBtn: 'Reset Default',
     },
   },
   ps: {
@@ -954,6 +1078,22 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       todayGrossProfitShort: 'ناخالصه ګټه',
       openLedgerBtn: 'د پیرودونکو کھاتہ',
       openImeiLookupBtn: 'ګودام او IMEI لټون',
+      ceoSpotlightTitle: 'د شرکت او مشرتابه پیژندنه',
+      ceoSpotlightBadge: 'اجرائیوي مشر (CEO)',
+      regOfficeLabel: 'ثبت شوی دفتر',
+      regMobileLabel: 'تلیفون',
+      regEmailLabel: 'بریښنالیک',
+      fiscalYearLabel: 'مالي کال',
+      editShopProfileBtn: 'د دوکان او CEO معلومات سمول',
+      shortcutBarTitle: 'چټک حسابداري میز (۱-کلیک)',
+      shortcutSale: 'د پلور بل',
+      shortcutPurchase: 'د خرید بل',
+      shortcutSr: 'د پلور واپسي (S/R)',
+      shortcutPr: 'د خرید واپسي (P/R)',
+      shortcutLedger: 'کھاتہ (Ledger A/c)',
+      shortcutOutstanding: '۴۸ ساعته پورونه',
+      shortcutStock: 'ګودام او IMEI',
+      shortcutPnl: 'ګټه/تاوان او بیلانس شیټ',
     },
     customers: {
       pageTitle: 'پیرودونکي او د پلور بلونه',
@@ -1067,6 +1207,12 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       imeiSearchPlaceholder: 'د IMEI یا عرضه کوونکي له مخې لټون...',
       noImeisFound: 'د دې ماډل لپاره لا کوم IMEI نه دی ثبت شوی. لاندې یې زیات کړئ.',
       noRegisterEntries: 'د دې توکي لپاره لا کوم پلور یا واپسي نه ده ثبت شوې.',
+      originCountryLabel: 'اصلي هیواد / شرکت',
+      variantRegionLabel: 'سیمه‌ییز کوډ / ماډل',
+      selectedItemTitle: 'د ټاکل شوي توکي حالت او چټکې تڼۍ',
+      clickRowHint: 'د تفصیل، ګټې مبلغ، IMEI یا راجستر لیدو لپاره پورته هر قطار کلیک کړئ.',
+      selectedImeiTitle: 'د ټاکل شوي IMEI تفصیلات',
+      purchaseRateLabel: 'د اخیستو بیه',
     },
     banking: {
       pageTitle: 'بانک، نغدې او د دوکان لګښتونه',
@@ -1202,6 +1348,29 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       customerLedgersLabel: 'د پیرودونکو حسابونه',
       supplierLedgersLabel: 'د عرضه کوونکو حسابونه',
       openStatementBtn: 'حساب وګورئ',
+      pnlViewSimple: 'ساده لنډیز',
+      pnlViewTAccount: 'T-Account (جمع | خرڅ)',
+      pnlViewBalanceSheet: 'بیلانس شیټ (Balance Sheet)',
+      openingStockLabel: 'پیلنی ګودام (Opening Stock)',
+      closingStockLabel: 'پاتې ګودام (Closing Stock)',
+      drSideLabel: 'Dr. (خرید، لګښت او ګټه)',
+      crSideLabel: 'Cr. (پلور او پاتې ګودام)',
+      assetsHeading: 'شتمني (نغد، بانک، طلبات او ګودام)',
+      liabilitiesEquityHeading: 'پورونه او خالصه سرمایه',
+      cashInHandLabel: 'نغدې پیسې (دخل)',
+      bankBalanceLabel: 'د بانک بیلانس',
+      customerReceivablesLabel: 'پر پیرودونکو طلبات (Sundry Debtors)',
+      supplierPayablesLabel: 'پر عرضه کوونکو پورونه (Sundry Creditors)',
+      netEquityLabel: 'خالصه سرمایه (Net Equity)',
+      totalAssetsLabel: 'ټوله شتمني',
+      totalLiabilitiesLabel: 'ټول پورونه او سرمایه',
+      ledgerSearchPlaceholder: 'پیرودونکی یا عرضه کوونکی په نوم، ښار یا شمېره ولټوئ...',
+      filterAllParties: 'ټول حسابونه',
+      filterCustomersOnly: 'پیرودونکي (Debtors)',
+      filterSuppliersOnly: 'عرضه کوونکي (Creditors)',
+      selectedPartyStatusTitle: 'د ټاکل شوي حساب اوسنی حالت',
+      accountGroupCustomer: 'پیرودونکی (Sundry Debtor)',
+      accountGroupSupplier: 'عرضه کوونکی (Sundry Creditor)',
     },
     ledger: {
       customerLedgerTitle: 'د پیرودونکي بشپړ حساب (Ledger A/c)',
@@ -1221,6 +1390,10 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       typeBill: 'د خرید بل',
       typeBillPayment: 'د بل تادیه',
       typeReturnPr: 'د خرید واپسي (P/R)',
+      viewRunningBtn: 'پرله‌پسې بیلانس',
+      viewTAccountBtn: 'T-حساب (Debit | Credit)',
+      tAccountLeftTitle: 'بدهي / Debit (Dr.)',
+      tAccountRightTitle: 'تادیه / Credit (Cr.)',
     },
     guide: {
       title: 'اسانه ګام پر ګام لارښود',
@@ -1276,6 +1449,19 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       preferencesSubtitle: 'هر وخت ژبه (انګلیسي، پښتو، دري) او اسعار (افغانی یا ډالر) بدل کړئ.',
       dataSafetyTitle: 'بیک اپ او د معلوماتو خوندیتوب',
       dataSafetyDesc: 'د خپلو حسابونو بشپړ JSON بیک اپ خوندي کړئ یا پخوانی فایل بېرته راولئ.',
+      shopProfileTitle: 'د دوکان او اجرائیوي مشر (CEO) معلومات',
+      shopProfileSubtitle: 'په اصلي پاڼه او چاپ شویو رسمي بلونو او کھاتو کې ښودل کېږي.',
+      shopNameLabel: 'د دوکان / شرکت نوم',
+      ceoNameLabel: 'د CEO / مالک نوم',
+      ceoTitleLabel: 'دنده / عنوان',
+      shopAddressLabel: 'د دوکان پته',
+      shopPhoneLabel: 'ثبت شوی تلیفون',
+      shopEmailLabel: 'بریښنالیک',
+      fiscalPeriodLabel: 'مالي دوره',
+      showCeoSpotlightLabel: 'د CEO عکس کارت پر اصلي پاڼه وښیه',
+      saveProfileBtn: 'معلومات خوندي کړئ',
+      profileSavedNotice: 'د دوکان او CEO معلومات ثبت شول.',
+      resetProfileBtn: 'اصلي حالت',
     },
   },
   fa: {
@@ -1388,6 +1574,22 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       todayGrossProfitShort: 'مفاد ناخالص',
       openLedgerBtn: 'صورت‌حساب مشتریان',
       openImeiLookupBtn: 'گدام و جستجوی IMEI',
+      ceoSpotlightTitle: 'پروفایل رسمی فروشگاه و مدیریت (CEO)',
+      ceoSpotlightBadge: 'مدیریت اجرایی',
+      regOfficeLabel: 'آدرس دفتر',
+      regMobileLabel: 'شماره تماس',
+      regEmailLabel: 'ایمیل',
+      fiscalYearLabel: 'دوره مالی',
+      editShopProfileBtn: 'ویرایش پروفایل فروشگاه و CEO',
+      shortcutBarTitle: 'دسترسی سریع میز حسابداری (۱-کلیک)',
+      shortcutSale: 'بل فروش',
+      shortcutPurchase: 'بل خرید',
+      shortcutSr: 'برگشت فروش (S/R)',
+      shortcutPr: 'برگشت خرید (P/R)',
+      shortcutLedger: 'صورت‌حساب (Ledger)',
+      shortcutOutstanding: 'قرض‌های ۴۸ ساعته',
+      shortcutStock: 'گدام و IMEI',
+      shortcutPnl: 'سود و زیان / بیلانس‌شیت',
     },
     customers: {
       pageTitle: 'مشتریان و بل‌های فروش',
@@ -1501,6 +1703,12 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       imeiSearchPlaceholder: 'جستجو با IMEI یا فروشنده...',
       noImeisFound: 'هنوز هیچ IMEI برای این مدل ثبت نشده است. از پایین اضافه کنید.',
       noRegisterEntries: 'هنوز هیچ فروش یا برگشتی برای این جنس ثبت نشده است.',
+      originCountryLabel: 'کشور سازنده / مبدا',
+      variantRegionLabel: 'کد منطقه / پارت (ZA/LL)',
+      selectedItemTitle: 'جزئیات جنس انتخاب‌شده و دسترسی سریع',
+      clickRowHint: 'برای دیدن منطقه، مفاد نقدی، IMEI یا دفتر جنس روی هر سطر کلیک کنید.',
+      selectedImeiTitle: 'بازرسی جزئیات IMEI انتخاب‌شده',
+      purchaseRateLabel: 'قیمت خرید',
     },
     banking: {
       pageTitle: 'بانک، صندوق نقد و مصارف دوکان',
@@ -1636,6 +1844,29 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       customerLedgersLabel: 'حساب‌های مشتریان',
       supplierLedgersLabel: 'حساب‌های فروشندگان',
       openStatementBtn: 'مشاهده صورت‌حساب',
+      pnlViewSimple: 'نمای ساده',
+      pnlViewTAccount: 'حساب T (بدهکار | بستانکار)',
+      pnlViewBalanceSheet: 'بیلانس شیت (Balance Sheet)',
+      openingStockLabel: 'موجودی اول دوره (Opening Stock)',
+      closingStockLabel: 'موجودی پایان دوره (Closing Stock)',
+      drSideLabel: 'Dr. (خرید، مصارف و مفاد)',
+      crSideLabel: 'Cr. (فروش و موجودی پایان)',
+      assetsHeading: 'دارایی‌ها (نقد، بانک، طلبات و گدام)',
+      liabilitiesEquityHeading: 'بدهی‌ها و سرمایه خالص',
+      cashInHandLabel: 'نقد در صندوق (Cash)',
+      bankBalanceLabel: 'موجودی حساب‌های بانکی',
+      customerReceivablesLabel: 'طلبات از مشتریان (Debtors)',
+      supplierPayablesLabel: 'بدهی به فروشندگان (Creditors)',
+      netEquityLabel: 'سرمایه خالص صاحب دوکان',
+      totalAssetsLabel: 'جمع کل دارایی‌ها',
+      totalLiabilitiesLabel: 'جمع بدهی‌ها و سرمایه',
+      ledgerSearchPlaceholder: 'جستجوی مشتری یا فروشنده با نام، شهر یا تلفن...',
+      filterAllParties: 'همه حساب‌ها',
+      filterCustomersOnly: 'مشتریان (Debtors)',
+      filterSuppliersOnly: 'فروشندگان (Creditors)',
+      selectedPartyStatusTitle: 'وضعیت فعلی حساب انتخاب‌شده',
+      accountGroupCustomer: 'مشتری (Sundry Debtor)',
+      accountGroupSupplier: 'فروشنده (Sundry Creditor)',
     },
     ledger: {
       customerLedgerTitle: 'صورت‌حساب مشتری (Ledger A/c)',
@@ -1655,6 +1886,10 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       typeBill: 'بل خرید',
       typeBillPayment: 'پرداخت بل',
       typeReturnPr: 'برگشت خرید (P/R)',
+      viewRunningBtn: 'مانده لحظه‌ای',
+      viewTAccountBtn: 'نمای T (بدهکار | بستانکار)',
+      tAccountLeftTitle: 'اقلام بدهکار (Dr.)',
+      tAccountRightTitle: 'اقلام بستانکار (Cr.)',
     },
     guide: {
       title: 'دستیار گام‌به‌گام استفاده از برنامه',
@@ -1710,6 +1945,19 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDict> = {
       preferencesSubtitle: 'هر زمان می‌توانید زبان نمایش (انگلیسی، پشتو، دری) و واحد پول را تغییر دهید.',
       dataSafetyTitle: 'مدیریت پشتیبان‌گیری و معلومات',
       dataSafetyDesc: 'نسخه کامل JSON تمام حساب‌های خود را ذخیره کنید یا از فایل قبلی بازیابی نمایید.',
+      shopProfileTitle: 'مشخصات فروشگاه و مدیریت اجرایی (CEO)',
+      shopProfileSubtitle: 'در کارت ویژه صفحه اصلی و روی بل‌های چاپی و صورت‌حساب‌ها نمایش داده می‌شود.',
+      shopNameLabel: 'نام فروشگاه / شرکت',
+      ceoNameLabel: 'نام رئیس / مدیر عامل (CEO)',
+      ceoTitleLabel: 'عنوان سمت',
+      shopAddressLabel: 'آدرس دوکان / دفتر',
+      shopPhoneLabel: 'شماره تماس ثبت‌شده',
+      shopEmailLabel: 'ایمیل رسمی',
+      fiscalPeriodLabel: 'دوره مالی',
+      showCeoSpotlightLabel: 'نمایش کارت تصویر CEO در صفحه اصلی',
+      saveProfileBtn: 'ذخیره پروفایل',
+      profileSavedNotice: 'مشخصات فروشگاه و CEO ذخیره شد.',
+      resetProfileBtn: 'حالت پیش‌فرض',
     },
   },
 };

@@ -33,7 +33,7 @@ import { PosSyncPage } from './components/pages/PosSyncPage';
 import { ReportsPage } from './components/pages/ReportsPage';
 import { SettingsPage } from './components/pages/SettingsPage';
 import { VendorsPage } from './components/pages/VendorsPage';
-import { SEED_ACCOUNTING_STATE } from './data/accountingSeed';
+import { DEFAULT_SHOP_PROFILE, SEED_ACCOUNTING_STATE } from './data/accountingSeed';
 import { SEED_CONFLICTS, SEED_INVENTORY, SEED_RESOLUTION_LOG } from './data/mockConflicts';
 import { TRANSLATIONS } from './i18n/translations';
 import type {
@@ -44,6 +44,7 @@ import type {
   CurrencyCode,
   ExpenseCategory,
   ProductItem,
+  ShopProfile,
 } from './types/accounting';
 import type { QuarantinedConflict } from './types/pos';
 import {
@@ -73,6 +74,7 @@ const ACCOUNTING_STORAGE_KEY = 'meridian_ledger_pro_state_v4';
 const POS_STORAGE_KEY = 'meridian_ledger_pro_sync_v4';
 const LANG_STORAGE_KEY = 'meridian_ledger_pro_lang_v4';
 const THEME_STORAGE_KEY = 'meridian_ledger_pro_theme_v4';
+const SHOP_PROFILE_STORAGE_KEY = 'meridian_ledger_pro_shop_profile_v4';
 
 const VALID_PAGES: AppPage[] = [
   'home',
@@ -184,12 +186,66 @@ function loadPosState(): ResolutionState {
   };
 }
 
+function loadShopProfile(): ShopProfile {
+  if (typeof window === 'undefined') return DEFAULT_SHOP_PROFILE;
+  try {
+    const raw = window.localStorage.getItem(SHOP_PROFILE_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<ShopProfile>;
+      if (parsed && typeof parsed === 'object') {
+        return {
+          shopName:
+            typeof parsed.shopName === 'string' && parsed.shopName.trim()
+              ? parsed.shopName
+              : DEFAULT_SHOP_PROFILE.shopName,
+          ceoName:
+            typeof parsed.ceoName === 'string' && parsed.ceoName.trim()
+              ? parsed.ceoName
+              : DEFAULT_SHOP_PROFILE.ceoName,
+          ceoTitle:
+            typeof parsed.ceoTitle === 'string' && parsed.ceoTitle.trim()
+              ? parsed.ceoTitle
+              : DEFAULT_SHOP_PROFILE.ceoTitle,
+          address:
+            typeof parsed.address === 'string' && parsed.address.trim()
+              ? parsed.address
+              : DEFAULT_SHOP_PROFILE.address,
+          phone:
+            typeof parsed.phone === 'string' && parsed.phone.trim()
+              ? parsed.phone
+              : DEFAULT_SHOP_PROFILE.phone,
+          email:
+            typeof parsed.email === 'string' && parsed.email.trim()
+              ? parsed.email
+              : DEFAULT_SHOP_PROFILE.email,
+          fiscalPeriod:
+            typeof parsed.fiscalPeriod === 'string' && parsed.fiscalPeriod.trim()
+              ? parsed.fiscalPeriod
+              : DEFAULT_SHOP_PROFILE.fiscalPeriod,
+          ceoPhotoUrl:
+            typeof parsed.ceoPhotoUrl === 'string' && parsed.ceoPhotoUrl.trim()
+              ? parsed.ceoPhotoUrl
+              : DEFAULT_SHOP_PROFILE.ceoPhotoUrl,
+          showCeoSpotlight:
+            typeof parsed.showCeoSpotlight === 'boolean'
+              ? parsed.showCeoSpotlight
+              : DEFAULT_SHOP_PROFILE.showCeoSpotlight,
+        };
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return DEFAULT_SHOP_PROFILE;
+}
+
 export default function App() {
   const [activePage, setActivePage] = useState<AppPage>(getInitialPage);
   const [language, setLanguage] = useState<AppLanguage>(getInitialLanguage);
   const [themeId, setThemeId] = useState<AppThemeId>(getInitialThemeId);
   const [accounting, setAccounting] = useState<AccountingState>(loadAccountingState);
   const [posState, setPosState] = useState<ResolutionState>(loadPosState);
+  const [shopProfile, setShopProfile] = useState<ShopProfile>(loadShopProfile);
   const [guideOpen, setGuideOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileQuickActionsOpen, setMobileQuickActionsOpen] = useState(false);
@@ -245,6 +301,14 @@ export default function App() {
       // ignore
     }
   }, [posState]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(SHOP_PROFILE_STORAGE_KEY, JSON.stringify(shopProfile));
+    } catch {
+      // ignore
+    }
+  }, [shopProfile]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -366,6 +430,8 @@ export default function App() {
       name: string;
       sku: string;
       brand?: string;
+      originCountry?: string;
+      variantRegion?: string;
       category: string;
       costUsd: number;
       priceUsd: number;
@@ -511,6 +577,7 @@ export default function App() {
       inventory: SEED_INVENTORY,
       logs: SEED_RESOLUTION_LOG,
     });
+    setShopProfile(DEFAULT_SHOP_PROFILE);
     setBackupNotice(null);
   }, []);
 
@@ -885,6 +952,7 @@ export default function App() {
         {activePage === 'home' && (
           <HomePage
             state={accounting}
+            shopProfile={shopProfile}
             language={language}
             onChangeLanguage={setLanguage}
             onChangeCurrency={handleChangeCurrency}
@@ -897,6 +965,7 @@ export default function App() {
         {activePage === 'customers' && (
           <CustomersPage
             state={accounting}
+            shopProfile={shopProfile}
             onCreateInvoice={handleCreateInvoice}
             onReceivePayment={handleReceivePayment}
             onReturnInvoice={handleReturnInvoice}
@@ -910,6 +979,7 @@ export default function App() {
         {activePage === 'vendors' && (
           <VendorsPage
             state={accounting}
+            shopProfile={shopProfile}
             onCreateBill={handleCreateBill}
             onPayBill={handlePayBill}
             onReturnBill={handleReturnBill}
@@ -961,6 +1031,7 @@ export default function App() {
         {activePage === 'reports' && (
           <ReportsPage
             state={accounting}
+            shopProfile={shopProfile}
             language={language}
             onCollectPayment={() => navigateTo('customers', 'payment')}
             onPayBills={() => navigateTo('vendors')}
@@ -970,6 +1041,9 @@ export default function App() {
 
         {activePage === 'settings' && (
           <SettingsPage
+            shopProfile={shopProfile}
+            onUpdateShopProfile={setShopProfile}
+            onResetShopProfile={() => setShopProfile(DEFAULT_SHOP_PROFILE)}
             themeId={themeId}
             onChangeTheme={setThemeId}
             language={language}

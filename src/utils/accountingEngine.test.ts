@@ -5,6 +5,7 @@ import {
   addCustomer,
   addProductItem,
   computeAccountingSummary,
+  computeBalanceSheetSnapshot,
   computeDailyBusinessPulse,
   computeMarginPct,
   computeOutstandingLoansReport,
@@ -159,6 +160,8 @@ test('addCustomer, addProductItem, recordBankEntry, and computeAccountingSummary
     name: 'AirPods Pro 2',
     sku: 'APL-APP2',
     brand: 'Apple',
+    originCountry: 'USA',
+    variantRegion: 'LL/A',
     category: 'Audio',
     costUsd: 180,
     priceUsd: 249,
@@ -168,6 +171,8 @@ test('addCustomer, addProductItem, recordBankEntry, and computeAccountingSummary
   assert.equal(pRes.ok, true);
   if (pRes.ok) {
     assert.equal(pRes.product.brand, 'Apple');
+    assert.equal(pRes.product.originCountry, 'USA');
+    assert.equal(pRes.product.variantRegion, 'LL/A');
     assert.equal(pRes.product.reorderLevel, 3);
     assert.equal(computeMarginPct(pRes.product.costUsd, pRes.product.priceUsd), 38.3);
   }
@@ -221,14 +226,23 @@ test('computePartyLedger builds Debit/Credit/Running Balance statements for cust
   }
 });
 
-test('computeProfitAndLossStatement and computeProductRegister compute Trading P&L and item history', () => {
+test('computeProfitAndLossStatement, computeBalanceSheetSnapshot, and computeProductRegister compute Trading P&L and Balance Sheet', () => {
   const pnl = computeProfitAndLossStatement(SEED_ACCOUNTING_STATE);
   assert.equal(pnl.grossSalesUsd, 5495);
   assert.equal(pnl.salesReturnsUsd, 0);
   assert.equal(pnl.netSalesUsd, 5495);
+  assert.equal(pnl.openingStockUsd, 24410);
   assert.ok(pnl.grossProfitUsd > 0);
   assert.equal(pnl.expensesBreakdown.employee_salary, 120);
   assert.equal(pnl.expensesBreakdown.shop_rent, 350);
+
+  const bs = computeBalanceSheetSnapshot(SEED_ACCOUNTING_STATE);
+  assert.equal(bs.cashUsd, 3450);
+  assert.equal(bs.bankUsd, 14200);
+  assert.equal(bs.receivablesUsd, 1998);
+  assert.equal(bs.closingStockUsd, 24000);
+  assert.equal(bs.payablesUsd, 2090);
+  assert.equal(bs.totalAssetsUsd, bs.totalLiabilitiesEquityUsd);
 
   const register = computeProductRegister(SEED_ACCOUNTING_STATE, 'prod-1');
   assert.equal(register.length, 1);
@@ -355,6 +369,14 @@ test('guideBot answers English, Pashto, and Dari questions across all new topics
 
   const billFa = answerGuideQuestion('چطور بل فروشنده پرداخت کنم', 'fa', 'home');
   assert.equal(billFa.targetPage, 'vendors');
+
+  const bsFa = answerGuideQuestion('ترازنامه و سود و زیان T-Account چطور ببینم', 'fa', 'home');
+  assert.equal(bsFa.targetPage, 'reports');
+  assert.ok(bsFa.steps.fa.length >= 3);
+
+  const ceoPs = answerGuideQuestion('د دوکان نوم او د CEO انځور څنګه بدل کړم', 'ps', 'home');
+  assert.equal(ceoPs.targetPage, 'settings');
+  assert.ok(ceoPs.steps.ps.length >= 3);
 
   const pageGuide = getPageQuickGuide('reports', 'fa');
   assert.equal(pageGuide.targetPage, 'reports');

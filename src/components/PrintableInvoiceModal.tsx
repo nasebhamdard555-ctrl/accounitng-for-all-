@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Printer, X } from 'lucide-react';
 import type { TranslationDict } from '../i18n/translations';
-import type { AccountingState, SalesInvoice } from '../types/accounting';
+import type { AccountingState, SalesInvoice, ShopProfile } from '../types/accounting';
 import { formatAmount } from '../utils/accountingEngine';
 import { buildPrintableInvoiceData } from '../utils/invoiceDocument';
 import { usePageTheme } from '../utils/ThemeContext';
@@ -9,6 +9,7 @@ import { usePageTheme } from '../utils/ThemeContext';
 interface PrintableInvoiceModalProps {
   invoice: SalesInvoice;
   state: AccountingState;
+  shopProfile?: ShopProfile;
   onClose: () => void;
   t: TranslationDict;
 }
@@ -16,6 +17,7 @@ interface PrintableInvoiceModalProps {
 export function PrintableInvoiceModal({
   invoice,
   state,
+  shopProfile,
   onClose,
   t,
 }: PrintableInvoiceModalProps) {
@@ -84,9 +86,18 @@ export function PrintableInvoiceModal({
           <header className={`flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b-2 ${theme.navActiveBorder}`}>
             <div>
               <div className={`font-display text-2xl font-bold ${theme.headingText} tracking-tight`}>
-                {t.appName}
+                {shopProfile?.shopName || t.appName}
               </div>
-              <p className="text-xs text-slate-600 mt-1">{t.tagline}</p>
+              {shopProfile ? (
+                <div className="text-xs text-slate-600 mt-1 space-y-0.5">
+                  <p>{shopProfile.address}</p>
+                  <p className="font-mono">
+                    {shopProfile.phone} · {shopProfile.email}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-600 mt-1">{t.tagline}</p>
+              )}
             </div>
 
             <div className="sm:text-end space-y-1.5">

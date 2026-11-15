@@ -1,4 +1,18 @@
-import type { AccountingState } from '../types/accounting';
+import type { AccountingState, ShopProfile } from '../types/accounting';
+
+export const CEO_PHOTO_ASSET_PATH = '/assets/aistudio/WhatsApp_Image_2026-11-15_at_3.55.36_PM_b00db317.jpeg';
+
+export const DEFAULT_SHOP_PROFILE: ShopProfile = {
+  shopName: 'Ayan Mobiles',
+  ceoName: 'Chief Executive Officer',
+  ceoTitle: 'Founder & CEO',
+  address: 'Office #C9, Gul Bahar Center, Kabul, Afghanistan',
+  phone: '0700-412-889',
+  email: 'ayanmobiles@gmail.com',
+  fiscalPeriod: '01/04/2026 — 31/03/2027',
+  ceoPhotoUrl: CEO_PHOTO_ASSET_PATH,
+  showCeoSpotlight: true,
+};
 
 function shiftUtcIsoDate(baseIso: string, deltaDays: number): string {
   const [y, m, d] = baseIso.split('-').map(Number);
@@ -175,6 +189,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       sku: 'APL-16P-256-TI',
       name: 'iPhone 16 Pro 256GB',
       brand: 'Apple',
+      originCountry: 'USA',
+      variantRegion: 'LL/A',
       category: 'Smartphones',
       costUsd: 1020,
       priceUsd: 1199,
@@ -186,6 +202,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       sku: 'SAM-S25U-512-BK',
       name: 'Galaxy S25 Ultra 512GB',
       brand: 'Samsung',
+      originCountry: 'Vietnam',
+      variantRegion: 'XA',
       category: 'Smartphones',
       costUsd: 1080,
       priceUsd: 1299,
@@ -197,6 +215,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       sku: 'GOG-PX9P-128-HZ',
       name: 'Pixel 9 Pro 128GB',
       brand: 'Google',
+      originCountry: 'USA',
+      variantRegion: 'LL/A',
       category: 'Smartphones',
       costUsd: 740,
       priceUsd: 899,
@@ -208,6 +228,8 @@ export const SEED_ACCOUNTING_STATE: AccountingState = {
       sku: 'APL-16-128-UL',
       name: 'iPhone 16 128GB',
       brand: 'Apple',
+      originCountry: 'China',
+      variantRegion: 'CH/A',
       category: 'Smartphones',
       costUsd: 680,
       priceUsd: 799,

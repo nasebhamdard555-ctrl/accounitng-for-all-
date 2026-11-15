@@ -54,6 +54,7 @@ export function ProductInspectorModal({
   const [formNotice, setFormNotice] = useState<{ type: 'ok' | 'err'; text: string } | null>(
     null
   );
+  const [selectedImei, setSelectedImei] = useState<string | null>(null);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -66,6 +67,7 @@ export function ProductInspectorModal({
   }, [onClose]);
 
   const marginPct = computeMarginPct(product.costUsd, product.priceUsd);
+  const marginAmtUsd = Math.max(0, Number((product.priceUsd - product.costUsd).toFixed(2)));
   const registerEntries = computeProductRegister(state, product.id);
   const matchingImeis = inventoryDevices.filter((dev) => dev.sku === product.sku);
   const q = imeiQuery.trim().toLowerCase();
@@ -77,6 +79,9 @@ export function ProductInspectorModal({
       (dev.purchaseInvoiceRef || '').toLowerCase().includes(q)
     );
   });
+
+  const activeImeiDevice =
+    visibleImeis.find((d) => d.imei === selectedImei) || visibleImeis[0] || null;
 
   const handleAddImei = (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,9 +113,19 @@ export function ProductInspectorModal({
               <h2 id="product-inspector-title" className={`font-display text-lg font-bold ${theme.headingText}`}>
                 {product.name}
               </h2>
+              {product.variantRegion && (
+                <span className="px-2 py-0.5 text-xs font-mono font-bold rounded border border-slate-300 bg-white text-slate-800">
+                  ({product.variantRegion})
+                </span>
+              )}
               {product.brand && (
                 <span className="px-2 py-0.5 text-xs font-semibold rounded border border-slate-300 bg-white text-slate-700">
                   {product.brand}
+                </span>
+              )}
+              {product.originCountry && (
+                <span className="px-2 py-0.5 text-xs font-medium rounded border border-slate-200 bg-slate-50 text-slate-700">
+                  {product.originCountry}
                 </span>
               )}
               <span className="font-mono text-xs text-slate-600">{product.sku}</span>
@@ -125,7 +140,7 @@ export function ProductInspectorModal({
                 <strong>{formatAmount(product.priceUsd, state.currency)}</strong>
               </span>
               <span className="text-[#2E6B52] font-semibold">
-                {t.inventory.marginLabel}: +{marginPct}%
+                {t.inventory.marginLabel}: +{formatAmount(marginAmtUsd, state.currency)} (+{marginPct}%)
               </span>
               <span>
                 {t.common.quantity}: <strong>{product.stockQty}</strong>
@@ -233,10 +248,24 @@ export function ProductInspectorModal({
                     ) : (
                       visibleImeis.map((dev) => {
                         const days = calcDaysInStock(dev.purchaseDate);
+                        const isSelected = activeImeiDevice?.imei === dev.imei;
                         return (
-                          <tr key={dev.imei} className="hover:bg-slate-50/70">
+                          <tr
+                            key={dev.imei}
+                            onClick={() => setSelectedImei(dev.imei)}
+                            className={`cursor-pointer transition-colors ${
+                              isSelected ? `${theme.subtleCardBg}` : 'hover:bg-slate-50/70'
+                            }`}
+                          >
                             <td className="px-3.5 py-2.5 font-mono font-semibold text-slate-900 whitespace-nowrap">
-                              {dev.imei}
+                              <button
+                                type="button"
+                                onClick={() => setSelectedImei(dev.imei)}
+                                aria-pressed={isSelected}
+                                className="text-start font-mono font-semibold underline decoration-dotted underline-offset-4 hover:text-slate-950"
+                              >
+                                {dev.imei}
+                              </button>
                             </td>
                             <td className="px-3.5 py-2.5 text-slate-700">
                               {dev.supplierName || '—'}
@@ -272,6 +301,56 @@ export function ProductInspectorModal({
                   </tbody>
                 </table>
               </div>
+
+              {activeImeiDevice && (
+                <div
+                  aria-label={t.inventory.selectedImeiTitle}
+                  className={`border ${theme.navActiveBorder} ${theme.subtleCardBg} rounded-md p-3.5 space-y-2`}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className={`text-xs font-bold uppercase tracking-wide ${theme.headingText}`}>
+                      {t.inventory.selectedImeiTitle}
+                    </span>
+                    <span className="font-mono text-xs font-bold text-slate-900">
+                      IMEI: {activeImeiDevice.imei}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs pt-1 border-t border-slate-200/80">
+                    <div>
+                      <span className="text-slate-500 block">{t.inventory.purchaseRateLabel}</span>
+                      <strong className="font-mono text-slate-900 tabular-nums">
+                        {formatAmount(activeImeiDevice.costUsd ?? product.costUsd, state.currency)}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">{t.inventory.supplierLabel}</span>
+                      <strong className="text-slate-900 truncate block">
+                        {activeImeiDevice.supplierName || '—'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">{t.inventory.purchaseInvLabel}</span>
+                      <strong className="font-mono text-slate-900">
+                        {activeImeiDevice.purchaseInvoiceRef || '—'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">{t.inventory.purchaseDateLabel}</span>
+                      <strong className="font-mono text-slate-900 tabular-nums">
+                        {activeImeiDevice.purchaseDate || '—'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">{t.inventory.daysInStockLabel}</span>
+                      <strong className={`font-mono tabular-nums ${theme.accentText}`}>
+                        {activeImeiDevice.purchaseDate
+                          ? `${calcDaysInStock(activeImeiDevice.purchaseDate)}d`
+                          : '—'}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <form
                 onSubmit={handleAddImei}

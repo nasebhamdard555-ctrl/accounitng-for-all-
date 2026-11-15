@@ -12,7 +12,7 @@ import {
 import { PartyLedgerModal } from '../PartyLedgerModal';
 import { PrintableInvoiceModal } from '../PrintableInvoiceModal';
 import type { TranslationDict } from '../../i18n/translations';
-import type { AccountingState, SalesInvoice } from '../../types/accounting';
+import type { AccountingState, SalesInvoice, ShopProfile } from '../../types/accounting';
 import {
   formatAmount,
   getInvoicePaidUsd,
@@ -43,6 +43,7 @@ interface CustomersPageProps {
   };
   focusTarget?: 'invoice' | 'payment' | 'add_customer' | null;
   onClearFocusTarget?: () => void;
+  shopProfile?: ShopProfile;
   t: TranslationDict;
 }
 
@@ -54,6 +55,7 @@ export function CustomersPage({
   onAddCustomer,
   focusTarget,
   onClearFocusTarget,
+  shopProfile,
   t,
 }: CustomersPageProps) {
   const theme = usePageTheme('customers');
@@ -703,6 +705,7 @@ export function CustomersPage({
         <PrintableInvoiceModal
           invoice={invoiceToPrint}
           state={state}
+          shopProfile={shopProfile}
           onClose={() => setInvoiceToPrint(null)}
           t={t}
         />
@@ -713,6 +716,7 @@ export function CustomersPage({
           kind="customer"
           partyId={ledgerCustomerId}
           state={state}
+          shopProfile={shopProfile}
           onClose={() => setLedgerCustomerId(null)}
           t={t}
         />
